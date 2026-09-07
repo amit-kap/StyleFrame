@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-body);
+  --font-mono: "Geist Mono", "SFMono-Regular", ui-monospace, monospace;
+}
+
+:root {
+  font-family: var(--font-body);
+  color: var(--foreground);
+  background: var(--background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--background);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.flavor-option {
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.theme-root {
+  --background: #f7f5ef;
+  --foreground: #171717;
+  --muted: #ece8df;
+  --muted-foreground: #69645c;
+  --card: #fffdf8;
+  --card-foreground: #171717;
+  --popover: #fffdf8;
+  --popover-foreground: #171717;
+  --primary: #171717;
+  --primary-hover: #313131;
+  --primary-foreground: #ffffff;
+  --secondary: #ece8df;
+  --secondary-hover: #e1dbcf;
+  --secondary-foreground: #171717;
+  --accent: #b06a3b;
+  --accent-soft: #ead7c7;
+  --border: #d7d0c4;
+  --input: #fffdf8;
+  --ring: #171717;
+  --radius-card: 16px;
+  --radius-button: 999px;
+  --radius-input: 12px;
+  --radius-badge: 999px;
+  --shadow-card: 0 18px 60px rgb(23 23 23 / 0.08);
+  --shadow-button: 0 10px 30px rgb(23 23 23 / 0.12);
+  --font-body: Manrope, ui-sans-serif, system-ui, sans-serif;
+  --font-display: Manrope, ui-sans-serif, system-ui, sans-serif;
+  --font-ui: Manrope, ui-sans-serif, system-ui, sans-serif;
+  --hero-size: 64px;
+  --hero-size-lg: 96px;
+  --hero-leading: 0.95;
+  --hero-weight: 760;
+  --heading-tracking: 0;
+  --body-size: 18px;
+  --body-leading: 1.6;
+  --section-space: 80px;
+  --preview-density: 1;
+  --pattern-opacity: 0.16;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  transition:
+    background-color 700ms cubic-bezier(0.32, 0.72, 0, 1),
+    color 700ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.theme-root button,
+.theme-root input,
+.theme-root select,
+.theme-root table {
+  font-family: var(--font-ui);
+}
+
+.theme-root h2,
+.theme-root h3 {
+  font-family: var(--font-display);
+  letter-spacing: var(--heading-tracking);
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: var(--hero-size);
+  font-weight: var(--hero-weight);
+  line-height: var(--hero-leading);
+  letter-spacing: 0;
+  background: linear-gradient(90deg, var(--foreground), var(--muted-foreground));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-wrap: balance;
+}
+
+.copy {
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  text-wrap: pretty;
+}
+
+.motif {
+  opacity: var(--pattern-opacity);
+  background-image: var(--motif);
+  background-size: var(--motif-size);
+}
+
+.reveal {
+  transform: translateY(64px);
+  filter: blur(12px);
+  opacity: 0;
+  transition:
+    transform 900ms cubic-bezier(0.32, 0.72, 0, 1),
+    filter 900ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 900ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.reveal.is-visible {
+  transform: translateY(0);
+  filter: blur(0);
+  opacity: 1;
+}
+
+.tagline-word {
+  color: color-mix(in srgb, var(--foreground) 30%, transparent);
+  transition: color 800ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.tagline-word.is-visible {
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .reveal {
+    transform: none;
+    filter: none;
+    opacity: 1;
+  }
+
+  .tagline-word {
+    color: var(--foreground);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: var(--hero-size-lg);
+  }
+}
