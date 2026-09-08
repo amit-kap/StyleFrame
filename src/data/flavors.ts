@@ -731,6 +731,9 @@ export const flavors: Flavor[] = rawFlavors.map((flavor) => ({
   cssVars: {
     ...flavor.cssVars,
     ...typePresets[flavor.id],
+    "--radius": flavor.cssVars["--radius-input"] ?? flavor.cssVars["--radius-button"],
+    "--font-sans": typePresets[flavor.id]["--font-ui"] ?? flavor.cssVars["--font-body"],
+    "--accent-foreground": flavor.cssVars["--foreground"],
   },
 }));
 

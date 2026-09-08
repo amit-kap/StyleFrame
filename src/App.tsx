@@ -1,27 +1,34 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from "react";
 import {
-  ArrowRightIcon,
   BracketsCurlyIcon,
-  ChartLineUpIcon,
-  CheckCircleIcon,
-  CircuitryIcon,
-  CopyIcon,
+  DotsThreeIcon,
   FileTextIcon,
-  GaugeIcon,
-  SparkleIcon,
+  HandbagIcon,
+  ListBulletsIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  SquaresFourIcon,
+  TagIcon,
+  UserCircleIcon,
+  WarningIcon,
 } from "@phosphor-icons/react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { defaultFlavor, flavors, type Flavor } from "@/data/flavors";
+import { AspectRatio } from "@comp/components/ui/aspect-ratio";
+import { Alert, AlertTitle } from "@comp/components/ui/alert";
+import { Badge } from "@comp/components/ui/badge";
+import { Button } from "@comp/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@comp/components/ui/card";
+import { Checkbox } from "@comp/components/ui/checkbox";
+import { Input } from "@comp/components/ui/input";
+import { Label } from "@comp/components/ui/label";
+import { Message, MessageContent, MessageGroup } from "@comp/components/ui/message";
+import { NativeSelect, NativeSelectOption } from "@comp/components/ui/native-select";
+import { RadioGroup, RadioGroupItem } from "@comp/components/ui/radio-group";
+import { Separator } from "@comp/components/ui/separator";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@comp/components/ui/sheet";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@comp/components/ui/table";
+import { Textarea } from "@comp/components/ui/textarea";
+import { flavors, type Flavor } from "@/data/flavors";
 
 function useReveal() {
   React.useEffect(() => {
@@ -42,17 +49,19 @@ function useReveal() {
   }, []);
 }
 
-function cssVars(flavor: Flavor) {
-  return flavor.cssVars as React.CSSProperties;
+function cssVars(flavor: Flavor | null) {
+  return flavor ? flavor.cssVars as React.CSSProperties : undefined;
 }
 
 function FlavorSidebar({
   activeFlavor,
   onFlavorChange,
 }: {
-  activeFlavor: Flavor;
-  onFlavorChange: (flavor: Flavor) => void;
+  activeFlavor: Flavor | null;
+  onFlavorChange: (flavor: Flavor | null) => void;
 }) {
+  useReveal();
+
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-80 overflow-y-auto border-r border-[#252936] bg-[#0f1117] p-5 text-[#f7f7f3] shadow-[0_24px_80px_rgb(0_0_0_/_0.28)] lg:flex lg:flex-col">
       <div className="flex items-center gap-3">
@@ -72,8 +81,21 @@ function FlavorSidebar({
           Flavors ({flavors.length})
         </p>
         <div className="grid gap-2">
+          <button
+            type="button"
+            aria-pressed={!activeFlavor}
+            onClick={() => onFlavorChange(null)}
+            className={[
+              "flavor-option flex h-8 w-full items-center rounded-full border px-3 text-left transition-[background-color,color,border-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70",
+              !activeFlavor
+                ? "border-[#5f6878] bg-[#252b35] text-[#f0f2f5]"
+                : "border-[#252d3b] bg-[#141923] text-[#b9c0cc] hover:border-[#313a4a] hover:bg-[#171c26] hover:text-[#d2d7df]",
+            ].join(" ")}
+          >
+            No flavor
+          </button>
           {flavors.map((flavor) => {
-            const isActive = flavor.id === activeFlavor.id;
+            const isActive = flavor.id === activeFlavor?.id;
             return (
               <div
                 key={flavor.id}
@@ -94,7 +116,7 @@ function FlavorSidebar({
                   <span className="truncate">{flavor.name}</span>
                 </button>
                 <Sheet>
-                  <SheetTrigger asChild>
+                  <SheetTrigger render={
                     <button
                       type="button"
                       className="flex size-6 shrink-0 items-center justify-center rounded-md text-[#8f98aa] transition-colors hover:bg-[#202735] hover:text-[#f0f2f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70"
@@ -102,7 +124,7 @@ function FlavorSidebar({
                     >
                       <FileTextIcon className="size-3.5" />
                     </button>
-                  </SheetTrigger>
+                  } />
                   <SheetContent className="max-h-[90vh] overflow-y-auto">
                     <SheetHeader>
                       <SheetTitle>{flavor.name} source</SheetTitle>
@@ -151,8 +173,8 @@ function MobileFlavorBar({
   activeFlavor,
   onFlavorChange,
 }: {
-  activeFlavor: Flavor;
-  onFlavorChange: (flavor: Flavor) => void;
+  activeFlavor: Flavor | null;
+  onFlavorChange: (flavor: Flavor | null) => void;
 }) {
   return (
     <div className="sticky top-0 z-30 border-b border-[#252936] bg-[#0f1117] p-3 text-[#f7f7f3] lg:hidden">
@@ -161,13 +183,18 @@ function MobileFlavorBar({
       </label>
       <select
         id="flavor-select"
-        value={activeFlavor.id}
+        value={activeFlavor?.id ?? "no-flavor"}
         onChange={(event) => {
+          if (event.target.value === "no-flavor") {
+            onFlavorChange(null);
+            return;
+          }
           const next = flavors.find((flavor) => flavor.id === event.target.value);
           if (next) onFlavorChange(next);
         }}
         className="h-11 w-full rounded-full border border-[#303746] bg-[#151923] px-3 text-sm font-semibold text-[#f7f7f3]"
       >
+        <option value="no-flavor">No flavor</option>
         {flavors.map((flavor) => (
           <option key={flavor.id} value={flavor.id}>
             {flavor.name}
@@ -182,326 +209,222 @@ function HomePreview({
   flavor,
   onFlavorChange,
 }: {
-  flavor: Flavor;
-  onFlavorChange: (flavor: Flavor) => void;
+  flavor: Flavor | null;
+  onFlavorChange: (flavor: Flavor | null) => void;
 }) {
-  useReveal();
-
-  const metrics = [
-    ["Flavor files", "13"],
-    ["Theme tokens", "31"],
-    ["shadcn parts", "10"],
-  ];
-
   return (
     <main id="main-content" className="min-h-screen lg:ml-80">
       <MobileFlavorBar activeFlavor={flavor} onFlavorChange={onFlavorChange} />
-      <div className="relative overflow-hidden">
+      <div className="relative min-h-screen px-6 py-6 md:px-8 lg:px-10">
         <div className="motif pointer-events-none absolute inset-0" />
-        <div className="relative flex min-h-screen w-full flex-col px-6 py-8 md:px-10 lg:px-12">
-          <nav className="reveal flex items-center justify-between gap-4 rounded-[var(--radius-button)] border border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[var(--shadow-card)]">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-[var(--radius-button)] bg-[var(--accent-soft)] text-[var(--accent)]">
-                <CircuitryIcon className="size-5" weight="bold" />
-              </div>
-              <span className="text-base font-semibold">Frameworks</span>
-            </div>
-            <div className="hidden items-center gap-2 md:flex">
-              <Button variant="ghost" size="sm" aria-current="page">
-                Preview
-              </Button>
-              <Button variant="ghost" size="sm">
-                Tokens
-              </Button>
-              <Button variant="ghost" size="sm">
-                Library
-              </Button>
-            </div>
-          </nav>
-
-          <section className="grid flex-1 items-center gap-10 py-24 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="reveal max-w-[680px] space-y-6">
-              <Badge variant="secondary">Active flavor: {flavor.name}</Badge>
-              <h2 className="hero-title">
-                One page.
-                <br />
-                Thirteen design systems.
-              </h2>
-              <p className="copy max-w-[680px] text-[var(--muted-foreground)]">
-                Styleframe applies a flavor specific DESIGN.md file to one homepage, so the same
-                structure can feel calm, technical, expressive, or electric in a single click.
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button size="lg">
-                  Try the active flavor
-                  <ArrowRightIcon className="size-5" />
-                </Button>
-                <Button size="lg" variant="outline">
-                  Compare tokens
-                </Button>
-              </div>
-              <p className="text-sm text-[var(--muted-foreground)]">
-                Built from real shadcn primitives with Tailwind v4 CSS variables.
-              </p>
-            </div>
-
-            <Card className="reveal overflow-hidden">
-              <CardHeader>
-                <div className="flex items-center justify-between gap-4">
-                  <Badge>{flavor.name}</Badge>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" aria-label="Copy token summary">
-                          <CopyIcon className="size-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy token summary</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <CardTitle>Applied theme snapshot</CardTitle>
-                <CardDescription>
-                  The same components stay mounted while variables change around them.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-3">
-                  {metrics.map(([label, value]) => (
-                    <div key={label} className="rounded-[var(--radius-input)] bg-[var(--muted)] p-4">
-                      <p className="text-3xl font-semibold">{value}</p>
-                      <p className="mt-1 text-sm text-[var(--muted-foreground)]">{label}</p>
-                    </div>
-                  ))}
-                </div>
-                <Tabs defaultValue="tokens" className="mt-6">
-                  <TabsList>
-                    <TabsTrigger value="tokens">Tokens</TabsTrigger>
-                    <TabsTrigger value="rules">Rules</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="tokens">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Role</TableHead>
-                          <TableHead>Value</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Accent</TableCell>
-                          <TableCell>{flavor.cssVars["--accent"]}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Card radius</TableCell>
-                          <TableCell>{flavor.cssVars["--radius-card"]}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Section rhythm</TableCell>
-                          <TableCell>{flavor.cssVars["--section-space"]}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TabsContent>
-                  <TabsContent value="rules">
-                    <p className="copy rounded-[var(--radius-input)] bg-[var(--muted)] p-4 text-base leading-6 text-[var(--muted-foreground)]">
-                      Preserve the page structure. Change the visual grammar through tokens,
-                      density, shape, and component state behavior.
-                    </p>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-          </section>
-        </div>
+        <PreviewFrame />
       </div>
-
-      <ContentSections flavor={flavor} />
     </main>
   );
 }
 
-function ContentSections({ flavor }: { flavor: Flavor }) {
-  const benefits = [
-    {
-      icon: <GaugeIcon className="size-6" weight="bold" />,
-      title: "Switch taste without rebuilding",
-      body: "The homepage uses one component tree. Flavor files alter the tokens, density, and surface behavior.",
-    },
-    {
-      icon: <FileTextIcon className="size-6" weight="bold" />,
-      title: "Keep markdown visible",
-      body: "Every coded theme has a matching DESIGN.md file, so the source reference stays readable.",
-    },
-    {
-      icon: <ChartLineUpIcon className="size-6" weight="bold" />,
-      title: "See component impact",
-      body: "Buttons, cards, tables, forms, tabs, overlays, and badges all respond to the selected flavor.",
-    },
-  ];
+function PreviewFrame() {
+  return (
+    <Card data-theme-preview="true" className="relative mx-auto w-full max-w-[1200px] gap-0 overflow-hidden py-0">
+      <StudioSection />
+      <ReferenceSections />
+    </Card>
+  );
+}
 
-  const words =
-    "A design reference becomes tangible when the same interface changes shape color rhythm and voice".split(
-      " ",
-    );
+function StudioSection() {
+  const navItems = ["Shop", "New In", "Stories", "Help"];
 
   return (
-    <div>
-      <section className="grid w-full gap-6 px-6 py-20 md:px-10 lg:grid-cols-3 lg:px-12">
-        {benefits.map((benefit) => (
-          <Card key={benefit.title} className="reveal">
-            <CardHeader>
-              <div className="flex size-12 items-center justify-center rounded-[var(--radius-input)] bg-[var(--accent-soft)] text-[var(--accent)]">
-                {benefit.icon}
+    <section className="relative w-full">
+      <nav aria-label="Theme preview navigation" className="grid h-12 grid-cols-[1fr_auto_1fr] items-center px-2">
+        <span className="text-base font-medium">Studio</span>
+        <div className="hidden items-center gap-1 md:flex">
+          {navItems.map((item) => (
+            <Button
+              key={item}
+              variant={item === "Shop" ? "secondary" : "ghost"}
+              size="sm"
+              aria-current={item === "Shop" ? "page" : undefined}
+              className="h-8"
+            >
+              {item}
+            </Button>
+          ))}
+        </div>
+        <div className="hidden items-center justify-self-end md:flex">
+          <div className="flex items-center gap-0.5">
+            <Button variant="ghost" size="icon" aria-label="Search"><MagnifyingGlassIcon /></Button>
+            <Button variant="ghost" size="icon" aria-label="Account"><UserCircleIcon /></Button>
+            <Button variant="ghost" size="icon" aria-label="Cart"><HandbagIcon /></Button>
+          </div>
+          <Button size="sm" className="ml-2 h-8">Sign in</Button>
+        </div>
+      </nav>
+      <div className="px-6 pb-6 pt-6">
+        <div className="mx-auto max-w-[880px] space-y-10">
+          <div className="flex justify-center text-center">
+            <div className="max-w-[560px] space-y-4">
+              <h2 className="text-4xl font-normal text-foreground">Little joys,<br />everywhere you go</h2>
+              <p className="text-sm leading-5 text-[var(--muted-foreground)]">We believe the smallest details are the ones that matter most. Turn an ordinary day into something worth remembering.</p>
+            </div>
+          </div>
+          <StudioProducts />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StudioProducts() {
+  const products = [
+    ["Minimalist Watch", "Clean design meets everyday durability.", "New", "https://astryx.atmeta.com/neutral/preview-watch.png"],
+    ["Wireless Headphones", "Immersive sound, all-day comfort.", "Popular", "https://astryx.atmeta.com/neutral/preview-headphones.png"],
+    ["Canvas Backpack", "Water-resistant canvas with a quiet, modern profile.", "Limited", "https://astryx.atmeta.com/neutral/preview-backpack.png"],
+  ];
+
+  return (
+    <div className="grid w-full gap-4 md:grid-cols-3">
+      {products.map(([name, description, label, image]) => {
+        const inputId = `quantity-${name.toLowerCase().replaceAll(" ", "-")}`;
+
+        return (
+          <Card key={name} className="h-full gap-0 py-0">
+            <AspectRatio ratio={1}>
+              <img src={image} alt={name} className="size-full object-cover" />
+            </AspectRatio>
+            <CardContent className="flex flex-1 flex-col gap-2 p-4">
+              <Badge>{label}</Badge>
+              <CardTitle className="text-center text-xl font-semibold leading-7">{name}</CardTitle>
+              <CardDescription className="flex-1 text-center text-xs leading-5">{description}</CardDescription>
+              <div className="flex w-full min-w-0 flex-wrap gap-2">
+                <div className="w-[72px]">
+                  <Label className="sr-only" htmlFor={inputId}>Quantity</Label>
+                  <Input id={inputId} defaultValue="1" aria-label="Quantity" className="h-7 text-sm" />
+                </div>
+                <Button variant="secondary" size="sm" className="h-7 min-w-0 flex-1">Add to cart</Button>
               </div>
-              <CardTitle>{benefit.title}</CardTitle>
-              <CardDescription>{benefit.body}</CardDescription>
-            </CardHeader>
+            </CardContent>
           </Card>
-        ))}
-      </section>
-
-      <section className="w-full px-6 py-20 md:px-10 lg:px-12">
-        <div className="reveal max-w-[680px]">
-          <Badge variant="outline">Tagline reveal</Badge>
-          <p className="mt-6 text-5xl font-bold leading-none text-balance md:text-6xl">
-            {words.map((word, index) => (
-              <span
-                key={`${word}-${index}`}
-                className="tagline-word mr-3 inline-block"
-                style={{ transitionDelay: `${index * 45}ms` }}
-              >
-                {word}
-              </span>
-            ))}
-          </p>
-        </div>
-      </section>
-
-      <section className="grid w-full gap-8 px-6 py-20 md:px-10 lg:grid-cols-[0.9fr_1.1fr] lg:px-12">
-        <div className="reveal space-y-5">
-          <Badge>How it works</Badge>
-          <h2 className="text-5xl font-bold leading-none text-balance">The flavor file acts like a design contract.</h2>
-          <p className="copy text-lg leading-7 text-[var(--muted-foreground)]">
-            Phase 1 keeps parsing out of scope. That makes it easier to tune the feeling of each
-            style before the app accepts arbitrary markdown.
-          </p>
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarFallback>AK</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold">Amit Kaplan</p>
-              <p className="text-sm text-[var(--muted-foreground)]">Design systems reviewer</p>
-            </div>
-          </div>
-        </div>
-
-        <Card className="reveal">
-          <CardHeader>
-            <CardTitle>Theme handoff checklist</CardTitle>
-            <CardDescription>
-              Each flavor has enough structure to become a proper runtime later.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible defaultValue="tokens">
-              <AccordionItem value="tokens">
-                <AccordionTrigger>Tokens are explicit</AccordionTrigger>
-                <AccordionContent>
-                  Colors, radius, spacing, shadow, type, and motif variables are named and applied
-                  through the preview root.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="components">
-                <AccordionTrigger>Components are shared</AccordionTrigger>
-                <AccordionContent>
-                  The same shadcn primitives are used across flavors. The app changes their visual
-                  contract, not their markup.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="markdown">
-                <AccordionTrigger>Markdown remains inspectable</AccordionTrigger>
-                <AccordionContent>
-                  The active DESIGN.md file is visible in a drawer, making the connection between
-                  readable guidance and rendered UI easy to inspect.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="w-full px-6 py-20 md:px-10 lg:px-12">
-        <Card className="reveal overflow-hidden">
-          <div className="grid gap-0 lg:grid-cols-[1fr_0.8fr]">
-            <div className="p-6 md:p-8">
-              <Badge variant="secondary">Newsletter component</Badge>
-              <h2 className="mt-5 text-4xl font-bold leading-10 text-balance">
-                Follow the Phase 2 parser work.
-              </h2>
-              <p className="copy mt-4 text-lg leading-7 text-[var(--muted-foreground)]">
-                The form is here to prove inputs, validation affordances, and buttons inherit the
-                selected flavor.
-              </p>
-              <form
-                className="mt-6 flex flex-col gap-3 sm:flex-row"
-                onSubmit={(event) => event.preventDefault()}
-              >
-                <Input type="email" required placeholder="amit@example.com" aria-label="Email address" />
-                <Button type="submit">Join preview</Button>
-              </form>
-            </div>
-            <div className="flex min-h-80 items-center justify-center bg-[var(--muted)] p-8">
-              <div className="relative flex aspect-square w-56 items-center justify-center rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-card)]">
-                <SparkleIcon className="size-20 text-[var(--accent)]" weight="duotone" />
-                <div className="absolute inset-8 rounded-[var(--radius-card)] border border-[var(--accent)] opacity-40" />
-              </div>
-            </div>
-          </div>
-        </Card>
-      </section>
-
-      <footer className="border-t border-[var(--border)] bg-[var(--card)] px-6 py-10 md:px-10 lg:px-12">
-        <div className="flex w-full flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xl font-semibold">Styleframe</p>
-            <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-              Current flavor: {flavor.name}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--muted-foreground)]">
-            <a className="hover:text-[var(--foreground)]" href="#main-content">
-              Back to preview
-            </a>
-            <span>Privacy</span>
-            <span>Terms</span>
-            <span className="inline-flex items-center gap-1 text-[var(--foreground)]">
-              <CheckCircleIcon className="size-4" weight="fill" />
-              Phase 1
-            </span>
-          </div>
-        </div>
-      </footer>
+        );
+      })}
     </div>
   );
 }
 
+function ReferenceSections() {
+  return (
+    <div className="relative w-full space-y-4 bg-[var(--card)] px-6 py-6">
+      <div className="grid gap-4 lg:grid-cols-[0.36fr_0.64fr]">
+        <ReferenceCheckout />
+        <ReferenceStudioAi />
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
+        <ReferenceInventory />
+        <ReferenceRevenue />
+      </div>
+    </div>
+  );
+}
+
+function ReferenceCheckout() {
+  const shipping = [
+    ["economy", "Economy Shipping", "Delivered in 5–7 business days", "$12.00"],
+    ["standard", "Standard Shipping", "Delivered in 3–5 business days", "$16.00"],
+    ["express", "Express Shipping", "Delivered in 1–2 business days", "$24.00"],
+  ];
+
+  return (
+    <Card className="gap-5 py-5">
+      <CardHeader className="px-5"><CardTitle className="text-xl font-semibold">Checkout</CardTitle></CardHeader>
+      <CardContent className="grid gap-4 px-5">
+        <div className="grid gap-2">
+          <Label htmlFor="checkout-email">Email</Label>
+          <Input id="checkout-email" type="email" placeholder="you@studio.com" />
+        </div>
+        <div className="grid gap-2">
+          <div><p className="text-sm font-medium">Shipping method</p><p className="mt-1 text-xs text-[var(--muted-foreground)]">Delivery time may vary based on location and availability.</p></div>
+          <RadioGroup defaultValue="economy" aria-label="Shipping method" className="gap-2">
+            {shipping.map(([value, title, detail, price]) => (
+              <Label key={value} className="flex cursor-pointer items-center gap-3 text-sm font-normal">
+                <RadioGroupItem value={value} />
+                <span className="min-w-0 flex-1"><span className="block font-medium">{title}</span><span className="block text-xs text-[var(--muted-foreground)]">{detail}</span></span>
+                <strong className="text-sm">{price}</strong>
+              </Label>
+            ))}
+          </RadioGroup>
+        </div>
+        <div className="grid gap-2">
+          <p className="text-sm font-medium">Payment method</p>
+          <div className="grid grid-cols-3 gap-2">
+            <Button variant="outline" className="h-16 flex-col gap-1 text-xs">▭<span>Card</span></Button>
+            <Button variant="outline" className="h-16 flex-col gap-1 text-xs">▯<span>Apple Pay</span></Button>
+            <Button variant="outline" className="h-16 flex-col gap-1 text-xs">▱<span>Google Pay</span></Button>
+          </div>
+        </div>
+        <div className="grid gap-2"><Label htmlFor="card-number">Card number</Label><Input id="card-number" placeholder="1234 1234 1234 1234" /></div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="grid gap-2"><Label htmlFor="expiry">Expiry</Label><Input id="expiry" placeholder="MM / YY" /></div>
+          <div className="grid gap-2"><Label htmlFor="cvc">CVC</Label><Input id="cvc" placeholder="123" /></div>
+        </div>
+        <div className="grid gap-2"><Label htmlFor="country">Country</Label><NativeSelect id="country" className="w-full"><NativeSelectOption value="us">United States</NativeSelectOption></NativeSelect></div>
+        <Label className="items-start gap-2 text-sm font-normal"><Checkbox defaultChecked aria-label="Securely save my information for 1-click checkout" /><span><span className="block">Securely save my information for 1-click checkout</span><span className="mt-1 block text-xs text-[var(--muted-foreground)]">Pay faster on Studio and everywhere Link is accepted.</span></span></Label>
+        <Button className="w-full">▢&nbsp; Pay now</Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ReferenceStudioAi() {
+  return (
+    <Card className="py-0">
+      <CardHeader className="border-b border-border px-4 py-4"><div className="flex items-center justify-between"><CardTitle className="text-xl font-semibold">Studio AI</CardTitle><div className="flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="Export conversation">⇩</Button><Button variant="ghost" size="icon-sm" aria-label="Close chat">×</Button></div></div></CardHeader>
+      <CardContent className="grid gap-5 p-4">
+        <p className="text-center text-xs text-[var(--muted-foreground)]">Today</p>
+        <MessageGroup>
+          <Message align="end"><MessageContent><div className="max-w-[80%] rounded-lg bg-muted px-4 py-3 text-sm">Where’s my order?</div></MessageContent></Message>
+          <Message><MessageContent><p className="text-sm leading-5">Your order #1043 — the Minimalist Watch and Linen Throw — shipped this morning from the Aisle 3 warehouse and is currently in transit with UPS. It’s on track to arrive at your address by end of day tomorrow.</p><p className="text-sm leading-5">Let me know if you’d like to reschedule the delivery, redirect it to a pickup point, or start a return once it arrives.</p></MessageContent></Message>
+          <Message align="end"><MessageContent><div className="max-w-[80%] rounded-lg bg-muted px-4 py-3 text-sm">Can you show me the full details?</div></MessageContent></Message>
+          <Message><MessageContent><p className="text-sm">Here’s everything I have on order #1043:</p><Card className="grid gap-3 py-4"><div className="flex justify-between gap-4"><span>Items<span className="block text-xs text-[var(--muted-foreground)]">Minimalist Watch · Linen Throw</span></span><strong>$248</strong></div><div><span>Shipping</span><span className="ml-2 text-xs text-[var(--muted-foreground)]">UPS Ground · $12</span></div><div className="flex justify-between"><span>Estimated arrival<span className="block text-xs text-[var(--muted-foreground)]">Tomorrow by 8pm</span></span><Badge>On time</Badge></div><div className="flex justify-between"><span>Tracking<span className="block text-xs text-[var(--muted-foreground)]">UPS 1Z 999 AA1 0123 4567 84</span></span><Button variant="link" size="xs">Track →</Button></div></Card></MessageContent></Message>
+        </MessageGroup>
+        <div className="flex flex-wrap justify-center gap-1"><Button variant="secondary" size="sm">Reschedule delivery</Button><Button variant="secondary" size="sm">Update shipping address</Button><Button variant="secondary" size="sm">Start a return</Button></div>
+        <Card className="py-2"><Textarea placeholder="Ask Studio AI..." aria-label="Message input" className="min-h-14 resize-none border-0 bg-transparent p-2 shadow-none focus-visible:ring-0" /><div className="flex items-center justify-between px-2"><Button variant="ghost" size="icon-sm" aria-label="Attach">+</Button><div className="flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="Voice input">♩</Button><Button size="icon-sm" aria-label="Send" disabled>↑</Button></div></div></Card>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ReferenceInventory() {
+  const items = [
+    [false, "Minimalist Watch", "Stainless steel, sapphire crystal", "42", "Aisle 3", "New", "https://astryx.atmeta.com/template-assets/Neutral-Watch.png"],
+    [true, "Wireless Headphones", "ANC, 30hr battery", "128", "Aisle 1", "Popular", "https://astryx.atmeta.com/template-assets/Neutral-Headphones.png"],
+    [false, "Canvas Backpack", "Water-resistant, 25L", "63", "Aisle 2", "Limited", "https://astryx.atmeta.com/template-assets/Neutral-Backpack.png"],
+    [true, "Leather Wallet", "Full-grain, RFID blocking", "15", "Aisle 4", "Leather", "https://astryx.atmeta.com/template-assets/Neutral-Wallet.png"],
+    [false, "Travel Tumbler", "Vacuum insulated, 16oz", "87", "Aisle 5", "Drinkware", "https://astryx.atmeta.com/template-assets/Neutral-Tumbler.png"],
+    [true, "Linen Throw", "Heavyweight, oat", "24", "Aisle 6", "Home", "https://astryx.atmeta.com/template-assets/Neutral-Blanket.png"],
+  ];
+
+  return (
+    <Card className="py-0">
+      <CardHeader className="flex-row items-center justify-between border-b border-border px-5 py-4"><CardTitle className="text-xl font-semibold">Inventory</CardTitle><Button size="sm"><PlusIcon />Add item</Button></CardHeader>
+      <CardContent className="grid gap-4 p-5">
+        <div className="flex flex-wrap items-center gap-3"><div className="relative"><MagnifyingGlassIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input className="h-7 w-48 pl-7" placeholder="Type and hit enter..." aria-label="Search inventory" /></div><Button variant="ghost" size="sm"><TagIcon />Filters</Button><div className="ml-auto flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="List view"><ListBulletsIcon /></Button><Button variant="ghost" size="icon-sm" aria-label="Grid view"><SquaresFourIcon /></Button></div></div>
+        <Alert><WarningIcon /><AlertTitle>2 items are running low</AlertTitle></Alert>
+        <Table><TableHeader className="[&_tr]:border-border"><TableRow><TableHead className="w-10" /><TableHead>Item</TableHead><TableHead>Available</TableHead><TableHead>Location</TableHead><TableHead>Tags</TableHead><TableHead className="w-10" /></TableRow></TableHeader><TableBody>{items.map(([selected, name, details, available, location, tag, image]) => <TableRow key={name} className="border-border"><TableCell><Checkbox defaultChecked={Boolean(selected)} aria-label={`Select ${name}`} /></TableCell><TableCell><div className="flex items-center gap-3"><img src={image} alt="" className="size-10 rounded-lg object-cover" /><span><span className="block font-medium">{name}</span><span className="block text-xs text-[var(--muted-foreground)]">{details}</span></span></div></TableCell><TableCell>{available}</TableCell><TableCell>{location}</TableCell><TableCell><Badge>{tag}</Badge></TableCell><TableCell><Button variant="ghost" size="icon-sm" aria-label="Row actions"><DotsThreeIcon /></Button></TableCell></TableRow>)}</TableBody></Table>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ReferenceRevenue() {
+  const activity = [["▣", "Order #1043", "Placed · 1:59 pm", "+$248"], ["▤", "Order #1041", "Refunded · 12:40 pm", "−$89"], ["▣", "Order #1040", "Placed · 10:30 am", "+$156"], ["▣", "Order #1038", "Placed · 9:11 am", "+$412"], ["▣", "Order #1037", "Placed · 8:42 am", "+$95"]];
+  return (
+    <Card className="py-0"><CardHeader className="px-5 py-4"><CardTitle className="text-xl font-semibold">Revenue</CardTitle></CardHeader><CardContent className="grid gap-5 px-5 pb-5"><div className="grid grid-cols-2 gap-4"><div><p className="text-2xl font-semibold">18K</p><p className="text-xs text-[var(--muted-foreground)]">Monthly revenue</p></div><div><p className="text-2xl font-semibold">+12%</p><p className="text-xs text-[var(--muted-foreground)]">Order growth</p></div></div><Separator /><div className="flex items-center justify-between"><h3 className="font-semibold">Activity</h3><Button variant="link" size="xs">See all</Button></div><div className="grid gap-4">{activity.map(([icon, title, detail, amount]) => <div key={title} className="flex items-center gap-2 text-sm"><span className="flex size-8 items-center justify-center rounded-full bg-muted text-xs">{icon}</span><span className="min-w-0 flex-1"><span className="block font-medium">{title}</span><span className="block text-xs text-[var(--muted-foreground)]">{detail}</span></span><strong>{amount}</strong></div>)}</div></CardContent></Card>
+  );
+}
+
 export default function App() {
-  const [activeFlavor, setActiveFlavor] = React.useState<Flavor>(defaultFlavor);
-
-  React.useEffect(() => {
-    const root = document.documentElement;
-    Object.entries(activeFlavor.cssVars).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-
-    return () => {
-      Object.keys(activeFlavor.cssVars).forEach((key) => {
-        root.style.removeProperty(key);
-      });
-    };
-  }, [activeFlavor]);
+  const [activeFlavor, setActiveFlavor] = React.useState<Flavor | null>(null);
 
   return (
     <div>
