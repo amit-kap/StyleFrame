@@ -37,6 +37,85 @@ input {
   line-height: 19px;
 }
 
+.app-body {
+  overflow: hidden;
+}
+
+.app-panel {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.panel-resize-handle {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+}
+
+.panel-resize-handle::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 40px;
+  border-radius: 999px;
+  background: #303746;
+  content: "";
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: height 180ms ease, background-color 180ms ease, opacity 180ms ease;
+}
+
+.panel-resize-handle:hover::after,
+.panel-resize-handle:focus-visible::after,
+.panel-resize-handle:active::after {
+  height: 64px;
+  background: #9ba3b4;
+  opacity: 1;
+}
+
+.panel-resize-handle:focus-visible {
+  outline: none;
+}
+
+.panel-resize-handle-left {
+  right: -6px;
+}
+
+.panel-resize-handle-right {
+  left: -6px;
+}
+
+.inspector-kicker {
+  margin-bottom: 8px;
+  color: #8f98aa;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.inspector-content {
+  display: grid;
+  gap: 12px;
+}
+
+.inspector-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.inspector-sections {
+  display: grid;
+  gap: 12px;
+}
+
 .theme-root {
   font-family: var(--font-sans);
   min-height: 100vh;
@@ -50,6 +129,83 @@ input {
 .theme-root h2,
 .theme-root h3 {
   font-family: var(--font-heading);
+}
+
+/* Preview type utilities resolve through the active DESIGN.md scale. */
+.theme-root .text-xs {
+  font-size: var(--type-label-sm-size, 0.75rem);
+  line-height: var(--type-label-sm-leading, 1rem);
+}
+
+.theme-root .text-sm {
+  font-size: var(--type-body-md-size, var(--body-size, 0.875rem));
+  line-height: var(--type-body-md-leading, var(--body-leading, 1.25rem));
+}
+
+.theme-root .text-base {
+  font-size: var(--type-body-md-size, var(--body-size, 1rem));
+  line-height: var(--type-body-md-leading, var(--body-leading, 1.5rem));
+}
+
+.theme-root .text-lg {
+  font-size: var(--type-title-lg-size, 1.25rem);
+  line-height: var(--type-title-lg-leading, 1.75rem);
+}
+
+.theme-root .text-xl {
+  font-size: var(--type-headline-md-size, 1.25rem);
+  line-height: var(--type-headline-md-leading, 1.75rem);
+}
+
+.theme-root .text-2xl {
+  font-size: var(--type-headline-lg-size, 1.5rem);
+  line-height: var(--type-headline-lg-leading, 2rem);
+}
+
+.theme-root .text-4xl {
+  font-size: var(--hero-size, 2.25rem);
+  line-height: var(--hero-leading, 1.15);
+}
+
+.theme-root .font-normal {
+  font-weight: var(--type-body-md-weight, var(--body-weight, 400));
+}
+
+.theme-root .font-medium,
+.theme-root .font-semibold {
+  font-weight: var(--type-label-md-weight, var(--type-title-lg-weight, 600));
+}
+
+.preview-hero-title {
+  font-family: var(--font-display, var(--font-heading));
+  font-size: var(--hero-size, 2.25rem);
+  font-weight: var(--hero-weight, 400);
+  line-height: var(--hero-leading, 1.15);
+  letter-spacing: var(--hero-tracking, 0);
+  text-wrap: balance;
+}
+
+.preview-body {
+  font-size: var(--body-size, 0.875rem);
+  font-weight: var(--body-weight, 400);
+  line-height: var(--body-leading, 1.25rem);
+  letter-spacing: var(--body-tracking, 0);
+  text-wrap: pretty;
+}
+
+.preview-card-title {
+  font-family: var(--font-heading);
+  font-size: var(--type-title-lg-size, 1.25rem);
+  font-weight: var(--type-title-lg-weight, 600);
+  line-height: var(--type-title-lg-leading, 1.75rem);
+  letter-spacing: var(--type-title-lg-tracking, 0);
+}
+
+.preview-card-description {
+  font-size: var(--type-body-md-size, 0.75rem);
+  font-weight: var(--type-body-md-weight, 400);
+  line-height: var(--type-body-md-leading, 1.25rem);
+  letter-spacing: var(--type-body-md-tracking, 0);
 }
 
 .hero-title {
@@ -124,7 +280,33 @@ input {
 }
 
 @media (min-width: 1024px) {
+  .app-shell {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .app-body {
+    height: calc(100vh - 4rem);
+    min-height: 0;
+  }
+
+  .app-panel,
+  .app-body > .theme-root {
+    height: 100%;
+  }
+
+  .app-body > .theme-root {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
   .hero-title {
     font-size: var(--hero-size-lg);
+  }
+}
+
+@media (max-width: 1023px) {
+  .app-body {
+    overflow: visible;
   }
 }

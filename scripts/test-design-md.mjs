@@ -10,7 +10,7 @@ const flavorDirectories = (await readdir(root, { withFileTypes: true }))
   .sort();
 
 test("every flavor follows the DESIGN.md contract", async () => {
-  assert.equal(flavorDirectories.length, 14);
+  assert.equal(flavorDirectories.length, 15);
   for (const id of flavorDirectories) {
     const source = await readFile(new URL(`${id}/DESIGN.md`, root), "utf8");
     const parsed = parseDesignMd(source, id);
@@ -22,7 +22,7 @@ test("every flavor follows the DESIGN.md contract", async () => {
     assert.ok(parsed.frontmatter.components, id);
     assert.equal(parsed.diagnostics.some((diagnostic) => diagnostic.severity === "error"), false, id);
     assert.ok(Object.keys(parsed.cssVars).length > 0, id);
-    assert.ok(Object.keys(parsed.cssVars).every((key) => STYLEFRAME_CSS_VARS.includes(key)), id);
+    assert.ok(Object.keys(parsed.cssVars).every((key) => STYLEFRAME_CSS_VARS.includes(key) || key.startsWith("--type-")), id);
   }
 });
 
@@ -39,6 +39,9 @@ colors:
 typography:
   body-md:
     fontFamily: Geist
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 24px
 rounded:
   base: 8px
 spacing:
@@ -53,4 +56,8 @@ components:
   assert.equal(parsed.cssVars["--primary"], "#123456");
   assert.equal(parsed.cssVars["--primary-foreground"], "#ffffff");
   assert.equal(parsed.cssVars["--radius"], "8px");
+  assert.equal(parsed.cssVars["--type-body-md-size"], "16px");
+  assert.equal(parsed.cssVars["--type-body-md-weight"], "400");
+  assert.equal(parsed.cssVars["--body-size"], "16px");
+  assert.equal(parsed.cssVars["--body-leading"], "24px");
 });

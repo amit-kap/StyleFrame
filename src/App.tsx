@@ -4,7 +4,10 @@ import {
   AppleIcon,
   ArrowUpIcon,
   BracesIcon,
+  CheckIcon,
+  ChevronDownIcon,
   CreditCardIcon,
+  CopyIcon,
   DownloadIcon,
   EllipsisIcon,
   FileTextIcon,
@@ -43,7 +46,7 @@ import { Separator } from "@comp/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@comp/components/ui/sheet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@comp/components/ui/table";
 import { Textarea } from "@comp/components/ui/textarea";
-import { flavors, type Flavor } from "@/data/flavors";
+import { flavors, type Flavor, type InspectorEntry } from "@/data/flavors";
 
 function useReveal() {
   React.useEffect(() => {
@@ -72,29 +75,126 @@ function cssVars(flavor: Flavor | null) {
   } as React.CSSProperties;
 }
 
+const PANEL_MIN = 20;
+const PANEL_MAX = 40;
+const PANEL_DEFAULT_LEFT = 24;
+const PANEL_DEFAULT_RIGHT = 22;
+
+function clampPanelWidth(width: number) {
+  return Math.min(PANEL_MAX, Math.max(PANEL_MIN, width));
+}
+
+function usePanelWidth(defaultWidth: number) {
+  const [width, setWidth] = React.useState(defaultWidth);
+  const dragRef = React.useRef<{ startX: number; startWidth: number; direction: 1 | -1 } | null>(null);
+
+  const startResize = React.useCallback((event: React.PointerEvent<HTMLButtonElement>, direction: 1 | -1) => {
+    event.preventDefault();
+    dragRef.current = { startX: event.clientX, startWidth: width, direction };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const handleMove = (moveEvent: PointerEvent) => {
+      if (!dragRef.current) return;
+      const { startX, startWidth, direction: resizeDirection } = dragRef.current;
+      const delta = ((moveEvent.clientX - startX) / window.innerWidth) * 100 * resizeDirection;
+      setWidth(clampPanelWidth(startWidth + delta));
+    };
+    const handleEnd = () => {
+      dragRef.current = null;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleEnd);
+    };
+
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleEnd);
+  }, [width]);
+
+  const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
+    const step = event.shiftKey ? 5 : 2;
+    if (event.key === "Home") {
+      event.preventDefault();
+      setWidth(PANEL_MIN);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      setWidth(PANEL_MAX);
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      setWidth((current) => clampPanelWidth(current + step));
+    } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      setWidth((current) => clampPanelWidth(current - step));
+    }
+  }, []);
+
+  return { width, startResize, handleKeyDown };
+}
+
+function ResizeHandle({
+  label,
+  width,
+  onPointerDown,
+  onKeyDown,
+  side,
+}: {
+  label: string;
+  width: number;
+  onPointerDown: (event: React.PointerEvent<HTMLButtonElement>) => void;
+  onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+  side: "left" | "right";
+}) {
+  return (
+    <button
+      type="button"
+      className={`panel-resize-handle panel-resize-handle-${side}`}
+      aria-label={label}
+      aria-valuemin={PANEL_MIN}
+      aria-valuemax={PANEL_MAX}
+      aria-valuenow={Math.round(width)}
+      aria-valuetext={`${Math.round(width)}% of view`}
+      role="separator"
+      onPointerDown={onPointerDown}
+      onKeyDown={onKeyDown}
+    />
+  );
+}
+
+function AppHeader() {
+  return (
+    <header className="app-header flex h-16 items-center border-b border-[#252936] bg-[#0f1117] px-5 text-[#f7f7f3]">
+      <div className="flex items-center gap-3">
+        <div className="flex size-8 items-center justify-center rounded-full border border-[#303746] bg-[#f7f7f3] text-[#0f1117]">
+          <BracesIcon className="size-4" />
+        </div>
+        <div className="flex items-baseline gap-3">
+          <span className="text-base font-semibold tracking-tight">StyleFrame</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9ba3b4]">design.md lab</span>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 function FlavorSidebar({
   activeFlavor,
   onFlavorChange,
+  width,
+  onResize,
+  onResizeKeyDown,
 }: {
   activeFlavor: Flavor | null;
   onFlavorChange: (flavor: Flavor | null) => void;
+  width: number;
+  onResize: (event: React.PointerEvent<HTMLButtonElement>) => void;
+  onResizeKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
 }) {
   useReveal();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-80 overflow-y-auto border-r border-[#252936] bg-[#0f1117] p-5 text-[#f7f7f3] shadow-[0_24px_80px_rgb(0_0_0_/_0.28)] lg:flex lg:flex-col">
-      <div className="flex items-center gap-3">
-        <div className="flex size-11 items-center justify-center rounded-full border border-[#303746] bg-[#f7f7f3] text-[#0f1117]">
-          <BracesIcon className="size-6" />
-        </div>
-        <div>
-          <p className="text-xs font-semibold uppercase text-[#9ba3b4]">DESIGN.md lab</p>
-          <h1 className="text-2xl font-semibold">Styleframe</h1>
-        </div>
-      </div>
-
-      <Separator className="my-5 bg-[#252936]" />
-
+    <aside className="app-panel app-panel-left relative hidden overflow-y-auto border-r border-[#252936] bg-[#0f1117] p-5 text-[#f7f7f3] shadow-[0_24px_80px_rgb(0_0_0_/_0.28)] lg:flex lg:flex-col" style={{ width: `${width}%` }}>
+      <ResizeHandle side="left" label="Resize Flavors panel" width={width} onPointerDown={onResize} onKeyDown={onResizeKeyDown} />
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase text-[#9ba3b4]">
           Flavors ({flavors.length})
@@ -190,6 +290,141 @@ function FlavorSidebar({
   );
 }
 
+function CopyTokenButton({ value }: { value: string }) {
+  const [copied, setCopied] = React.useState(false);
+
+  const copyValue = async () => {
+    await navigator.clipboard?.writeText(value);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
+
+  return (
+    <button
+      type="button"
+      className="inspector-copy inline-flex shrink-0 items-center gap-1 rounded-md border border-[#303746] px-1.5 py-1 font-mono text-[11px] text-[#b9c0cc] transition-colors hover:border-[#69758a] hover:text-[#f7f7f3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70"
+      onClick={copyValue}
+      aria-label={`Copy ${value}`}
+    >
+      {copied ? <CheckIcon className="size-3" /> : <CopyIcon className="size-3" />}
+      <span className="max-w-[120px] truncate">{value}</span>
+    </button>
+  );
+}
+
+function InspectorTokenRows({ entries, swatches = false }: { entries: InspectorEntry[]; swatches?: boolean }) {
+  if (entries.length === 0) {
+    return <p className="text-sm text-[#8f98aa]">No values declared.</p>;
+  }
+
+  return (
+    <div className="grid gap-2">
+      {entries.map((entry) => (
+        <div key={`${entry.label}-${entry.value}`} className="flex min-w-0 items-center justify-between gap-3 border-b border-[#252936] pb-2 last:border-0 last:pb-0">
+          <div className="flex min-w-0 items-center gap-2">
+            {swatches && <span className="size-3 shrink-0 rounded-sm border border-white/15" style={{ backgroundColor: entry.value }} aria-hidden="true" />}
+            <span className="min-w-0 truncate text-sm text-[#c5cad4]">{entry.label}</span>
+          </div>
+          <CopyTokenButton value={entry.value} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function InspectorSection({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  return (
+    <details className="inspector-section group border-b border-[#252936] py-3" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-[#f0f2f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70 [&::-webkit-details-marker]:hidden">
+        <span>{title}</span>
+        <ChevronDownIcon className="size-4 text-[#8f98aa] transition-transform group-open:rotate-180" />
+      </summary>
+      <div className="grid gap-4 pb-2 pt-4">{children}</div>
+    </details>
+  );
+}
+
+function GuidelineList({ title, items, tone }: { title: string; items: string[]; tone: "do" | "dont" }) {
+  return (
+    <div className="grid gap-2">
+      <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${tone === "do" ? "text-emerald-300" : "text-rose-300"}`}>{title}</p>
+      {items.length > 0 ? items.map((item) => <p key={item} className="text-sm leading-5 text-[#b9c0cc]">{item}</p>) : <p className="text-sm text-[#8f98aa]">No guidelines declared.</p>}
+    </div>
+  );
+}
+
+function FlavorInspector({
+  activeFlavor,
+  width,
+  onResize,
+  onResizeKeyDown,
+}: {
+  activeFlavor: Flavor | null;
+  width: number;
+  onResize: (event: React.PointerEvent<HTMLButtonElement>) => void;
+  onResizeKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+}) {
+  const inspector = activeFlavor?.inspector;
+
+  return (
+    <aside className="app-panel app-panel-right relative hidden overflow-y-auto border-l border-[#252936] bg-[#0f1117] p-5 text-[#f7f7f3] lg:block" style={{ width: `${width}%` }}>
+      <ResizeHandle side="right" label="Resize Flavor Inspector panel" width={width} onPointerDown={onResize} onKeyDown={onResizeKeyDown} />
+      <div className="inspector-content">
+        <InspectorSection title="Flavor info" defaultOpen>
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase text-[#9ba3b4]">Active flavor</p>
+            <p className="text-lg font-medium">{activeFlavor?.name ?? "No flavor"}</p>
+            <p className="text-sm leading-6 text-[#9ba3b4]">
+              {activeFlavor?.description ?? "Select a flavor to transform the main content preview."}
+            </p>
+          </div>
+          <div className="grid gap-2 rounded-lg border border-[#252936] bg-[#141923] p-3 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[#9ba3b4]">Theme scope</span>
+              <span className="font-medium">Main content</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[#9ba3b4]">Color scheme</span>
+              <span className="font-medium">{activeFlavor?.colorScheme ?? "Default"}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[#9ba3b4]">Panel width</span>
+              <span className="font-medium">{Math.round(width)}%</span>
+            </div>
+          </div>
+        </InspectorSection>
+        {inspector ? (
+          <div className="inspector-sections">
+            <InspectorSection title="Color palette" defaultOpen>
+              <div className="grid gap-4">
+                <div><p className="inspector-kicker">Brand</p><InspectorTokenRows entries={inspector.colors.brand} swatches /></div>
+                <div><p className="inspector-kicker">Accent</p><InspectorTokenRows entries={inspector.colors.accent} swatches /></div>
+                <div><p className="inspector-kicker">Neutrals</p><InspectorTokenRows entries={inspector.colors.neutrals} swatches /></div>
+              </div>
+            </InspectorSection>
+            <InspectorSection title="Typography">
+              <div><p className="inspector-kicker">Type scale</p><InspectorTokenRows entries={inspector.typography.typeScale} /></div>
+              <div><p className="inspector-kicker">Fonts</p><InspectorTokenRows entries={inspector.typography.fonts} /></div>
+            </InspectorSection>
+            <InspectorSection title="Spacing & shapes">
+              <div><p className="inspector-kicker">Spacing</p><InspectorTokenRows entries={inspector.spacing} /></div>
+              <div><p className="inspector-kicker">Border radius</p><InspectorTokenRows entries={inspector.radii} /></div>
+            </InspectorSection>
+            <InspectorSection title="Guidelines">
+              <GuidelineList title="Do" items={inspector.guidelines.do} tone="do" />
+              <GuidelineList title="Don't" items={inspector.guidelines.dont} tone="dont" />
+            </InspectorSection>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-[#303746] p-4 text-sm leading-6 text-[#9ba3b4]">
+            Select a flavor to inspect its design tokens and guidelines.
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 function MobileFlavorBar({
   activeFlavor,
   onFlavorChange,
@@ -234,7 +469,7 @@ function HomePreview({
   onFlavorChange: (flavor: Flavor | null) => void;
 }) {
   return (
-    <main id="main-content" className="min-h-screen lg:ml-80">
+    <main id="main-content" className="min-w-0 flex-1">
       <MobileFlavorBar activeFlavor={flavor} onFlavorChange={onFlavorChange} />
       <div className="relative min-h-screen px-6 py-6 md:px-8 lg:px-10">
         <div className="motif pointer-events-none absolute inset-0" />
@@ -286,8 +521,8 @@ function StudioSection() {
         <div className="w-full space-y-10">
           <div className="flex justify-center text-center">
             <div className="max-w-[560px] space-y-4">
-              <h2 className="text-4xl font-normal text-foreground">Little joys,<br />everywhere you go</h2>
-              <p className="text-sm leading-5 text-[var(--muted-foreground)]">We believe the smallest details are the ones that matter most. Turn an ordinary day into something worth remembering.</p>
+              <h2 className="preview-hero-title text-foreground">Little joys,<br />everywhere you go</h2>
+              <p className="preview-body text-[var(--muted-foreground)]">We believe the smallest details are the ones that matter most. Turn an ordinary day into something worth remembering.</p>
             </div>
           </div>
           <StudioProducts />
@@ -316,8 +551,8 @@ function StudioProducts() {
             </AspectRatio>
             <CardContent className="flex flex-1 flex-col gap-2 p-4">
               <Badge>{label}</Badge>
-              <CardTitle className="text-center text-xl font-semibold leading-7">{name}</CardTitle>
-              <CardDescription className="flex-1 text-center text-xs leading-5">{description}</CardDescription>
+              <CardTitle className="preview-card-title text-center">{name}</CardTitle>
+              <CardDescription className="preview-card-description flex-1 text-center">{description}</CardDescription>
               <div className="grid w-full min-w-0 grid-cols-2 gap-2">
                 <div className="min-w-0">
                   <Label className="sr-only" htmlFor={inputId}>Quantity</Label>
@@ -462,12 +697,29 @@ export default function App() {
   const [selectedFlavorId, setSelectedFlavorId] = React.useState<string | null>(null);
   const activeFlavor = flavors.find((flavor) => flavor.id === selectedFlavorId) ?? null;
   const setActiveFlavor = (flavor: Flavor | null) => setSelectedFlavorId(flavor?.id ?? null);
+  const leftPanel = usePanelWidth(PANEL_DEFAULT_LEFT);
+  const rightPanel = usePanelWidth(PANEL_DEFAULT_RIGHT);
 
   return (
-    <div>
-      <FlavorSidebar activeFlavor={activeFlavor} onFlavorChange={setActiveFlavor} />
-      <div className={activeFlavor?.colorScheme === "dark" ? "theme-root dark" : "theme-root"} style={cssVars(activeFlavor)}>
-        <HomePreview flavor={activeFlavor} onFlavorChange={setActiveFlavor} />
+    <div className="app-shell min-h-screen bg-[#0f1117]">
+      <AppHeader />
+      <div className="app-body flex min-h-[calc(100vh-4rem)] items-stretch">
+        <FlavorSidebar
+          activeFlavor={activeFlavor}
+          onFlavorChange={setActiveFlavor}
+          width={leftPanel.width}
+          onResize={(event) => leftPanel.startResize(event, 1)}
+          onResizeKeyDown={leftPanel.handleKeyDown}
+        />
+        <div className={activeFlavor?.colorScheme === "dark" ? "theme-root dark min-w-0 flex-1" : "theme-root min-w-0 flex-1"} style={cssVars(activeFlavor)}>
+          <HomePreview flavor={activeFlavor} onFlavorChange={setActiveFlavor} />
+        </div>
+        <FlavorInspector
+          activeFlavor={activeFlavor}
+          width={rightPanel.width}
+          onResize={(event) => rightPanel.startResize(event, -1)}
+          onResizeKeyDown={rightPanel.handleKeyDown}
+        />
       </div>
     </div>
   );

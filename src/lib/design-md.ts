@@ -24,6 +24,8 @@ export const STYLEFRAME_CSS_VARS = [
   "--accent-soft", "--border", "--input", "--ring", "--destructive",
   "--radius", "--radius-card", "--radius-button", "--radius-input",
   "--radius-badge", "--font-sans", "--font-heading", "--font-mono",
+  "--font-display", "--body-size", "--body-leading", "--hero-size", "--hero-size-lg",
+  "--hero-weight", "--hero-leading",
   "--duration-fast", "--duration-normal", "--ease-standard",
 ] as const;
 
@@ -31,8 +33,14 @@ const topLevelKeys = new Set(["version", "name", "description", "colorScheme", "
 
 const colorMap: Record<string, string> = {
   background: "--background", canvas: "--background", page: "--background",
+  surface: "--background", "surface-container-lowest": "--card", "surface-container-low": "--muted",
+  "surface-container": "--secondary", "surface-container-high": "--secondary-hover",
+  "surface-container-highest": "--secondary-hover", "surface-variant": "--muted",
+  "on-surface": "--foreground", "on-surface-variant": "--muted-foreground",
+  outline: "--border", "outline-variant": "--input",
+  tertiary: "--accent", "tertiary-container": "--accent-soft",
   foreground: "--foreground", text: "--foreground", ink: "--foreground",
-  card: "--card", surface: "--card", "card-foreground": "--card-foreground",
+  card: "--card", "card-foreground": "--card-foreground",
   primary: "--primary", "primary-hover": "--primary-hover",
   "primary-foreground": "--primary-foreground", secondary: "--secondary",
   "secondary-hover": "--secondary-hover", "secondary-foreground": "--secondary-foreground",
@@ -83,6 +91,16 @@ function cssDimension(value: unknown) {
   return typeof value === "number" || (typeof value === "string" && /^-?\d+(\.\d+)?(px|rem|em|%)?$/.test(value.trim()));
 }
 
+function cssTypographyValue(value: unknown) {
+  return typeof value === "number" || (typeof value === "string" && /^[\w.\-+/%(), ]+$/.test(value.trim()));
+}
+
+function typographyVarName(role: string, property: "fontSize" | "fontWeight" | "lineHeight" | "letterSpacing") {
+  const suffix = { fontSize: "size", fontWeight: "weight", lineHeight: "leading", letterSpacing: "tracking" }[property];
+  const normalized = role.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `--type-${normalized}-${suffix}`;
+}
+
 export function parseDesignMd(source: string, fallbackName: string): ParsedDesignMd {
   const parsed = frontmatterFrom(source);
   const data = parsed.data;
@@ -115,16 +133,46 @@ export function parseDesignMd(source: string, fallbackName: string): ParsedDesig
   const fontRole = Object.entries(typography).find(([key]) => /body|base|text/i.test(key))?.[1];
   const headingRole = Object.entries(typography).find(([key]) => /headline|heading|display|h1/i.test(key))?.[1];
   const fontValue = (role: unknown) => role && typeof role === "object" ? (role as Record<string, unknown>).fontFamily : undefined;
+  for (const [roleName, roleValue] of Object.entries(typography)) {
+    const role = roleValue && typeof roleValue === "object" ? roleValue as Record<string, unknown> : {};
+    for (const property of ["fontSize", "fontWeight", "lineHeight", "letterSpacing"] as const) {
+      const value = resolveValue(data, role[property]);
+      if (value !== undefined && cssTypographyValue(value)) cssVars[typographyVarName(roleName, property)] = String(value);
+    }
+  }
   const bodyFont = resolveValue(data, fontValue(fontRole));
   const headingFont = resolveValue(data, fontValue(headingRole));
   if (typeof bodyFont === "string") cssVars["--font-sans"] = bodyFont;
-  if (typeof headingFont === "string") cssVars["--font-heading"] = headingFont;
+  if (typeof headingFont === "string") {
+    cssVars["--font-heading"] = headingFont;
+    cssVars["--font-display"] = headingFont;
+  }
+  const displayEntry = Object.entries(typography).find(([key]) => /display|headline|heading|h1/i.test(key));
+  const bodyEntry = Object.entries(typography).find(([key]) => /body|base|text/i.test(key));
+  const semanticTypography = (entry: [string, unknown] | undefined, prefix: "hero" | "body") => {
+    if (!entry) return;
+    const [roleName, roleValue] = entry;
+    const role = roleValue && typeof roleValue === "object" ? roleValue as Record<string, unknown> : {};
+    const size = resolveValue(data, role.fontSize);
+    const weight = resolveValue(data, role.fontWeight);
+    const leading = resolveValue(data, role.lineHeight);
+    const tracking = resolveValue(data, role.letterSpacing);
+    if (cssTypographyValue(size)) cssVars[`--${prefix}-size`] = String(size);
+    if (cssTypographyValue(weight)) cssVars[`--${prefix}-weight`] = String(weight);
+    if (cssTypographyValue(leading)) cssVars[`--${prefix}-leading`] = String(leading);
+    if (cssTypographyValue(tracking)) cssVars[`--${prefix}-tracking`] = String(tracking);
+    if (prefix === "hero" && roleName.toLowerCase().includes("display") && cssTypographyValue(size)) {
+      cssVars["--hero-size-lg"] = String(size);
+    }
+  };
+  semanticTypography(displayEntry, "hero");
+  semanticTypography(bodyEntry, "body");
   const monoRole = Object.entries(typography).find(([key]) => /mono|code/i.test(key))?.[1];
   const monoFont = resolveValue(data, fontValue(monoRole));
   if (typeof monoFont === "string") cssVars["--font-mono"] = monoFont;
 
   const rounded = data.rounded && typeof data.rounded === "object" ? data.rounded as Record<string, unknown> : {};
-  const baseRadius = rounded.base ?? rounded.md ?? rounded.sm;
+  const baseRadius = rounded.base ?? rounded.DEFAULT ?? rounded.md ?? rounded.sm;
   if (baseRadius !== undefined) {
     const value = resolveValue(data, baseRadius);
     if (cssDimension(value)) cssVars["--radius"] = String(value);
@@ -154,6 +202,6 @@ export function parseDesignMd(source: string, fallbackName: string): ParsedDesig
   if (secondaryHover) cssVars["--secondary-hover"] = secondaryHover;
 
   const allowed = new Set<string>(STYLEFRAME_CSS_VARS);
-  for (const key of Object.keys(cssVars)) if (!allowed.has(key)) delete cssVars[key];
+  for (const key of Object.keys(cssVars)) if (!allowed.has(key) && !key.startsWith("--type-")) delete cssVars[key];
   return { frontmatter: data, body: parsed.body, name, description, colorScheme, cssVars, diagnostics };
 }
