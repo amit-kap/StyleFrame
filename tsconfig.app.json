@@ -21,7 +21,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@comp/*": ["../shadcn-comp-lib/src/*"]
+      "@comp/*": ["../shadcn-comp-lib/src/*"],
+      "lucide-react": ["../shadcn-comp-lib/node_modules/lucide-react"]
     }
   },
   "include": ["src"]

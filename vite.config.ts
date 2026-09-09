@@ -10,6 +10,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@comp": path.resolve(__dirname, "../shadcn-comp-lib/src"),
+      "lucide-react": path.resolve(__dirname, "../shadcn-comp-lib/node_modules/lucide-react"),
       react: path.resolve(__dirname, "./node_modules/react"),
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },

@@ -1,18 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from "react";
 import {
-  BracketsCurlyIcon,
-  DotsThreeIcon,
+  AlertTriangleIcon,
+  AppleIcon,
+  ArrowUpIcon,
+  BracesIcon,
+  CreditCardIcon,
+  DownloadIcon,
+  EllipsisIcon,
   FileTextIcon,
-  HandbagIcon,
-  ListBulletsIcon,
-  MagnifyingGlassIcon,
+  Grid2X2Icon,
+  ListIcon,
+  MicIcon,
+  PackageIcon,
   PlusIcon,
-  SquaresFourIcon,
+  SearchIcon,
+  ShoppingBagIcon,
   TagIcon,
-  UserCircleIcon,
-  WarningIcon,
-} from "@phosphor-icons/react";
+  UserRoundIcon,
+  WalletCardsIcon,
+  XIcon,
+} from "lucide-react";
 import { AspectRatio } from "@comp/components/ui/aspect-ratio";
 import { Alert, AlertTitle } from "@comp/components/ui/alert";
 import { Badge } from "@comp/components/ui/badge";
@@ -21,7 +28,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@comp
 import { Checkbox } from "@comp/components/ui/checkbox";
 import { Input } from "@comp/components/ui/input";
 import { Label } from "@comp/components/ui/label";
-import { Message, MessageContent, MessageGroup } from "@comp/components/ui/message";
+import { Message, MessageContent } from "@comp/components/ui/message";
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "@comp/components/ui/message-scroller";
 import { NativeSelect, NativeSelectOption } from "@comp/components/ui/native-select";
 import { RadioGroup, RadioGroupItem } from "@comp/components/ui/radio-group";
 import { Separator } from "@comp/components/ui/separator";
@@ -50,7 +65,11 @@ function useReveal() {
 }
 
 function cssVars(flavor: Flavor | null) {
-  return flavor ? flavor.cssVars as React.CSSProperties : undefined;
+  if (!flavor || flavor.diagnostics.some((diagnostic) => diagnostic.severity === "error")) return undefined;
+  return {
+    ...flavor.cssVars,
+    colorScheme: flavor.colorScheme,
+  } as React.CSSProperties;
 }
 
 function FlavorSidebar({
@@ -66,7 +85,7 @@ function FlavorSidebar({
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-80 overflow-y-auto border-r border-[#252936] bg-[#0f1117] p-5 text-[#f7f7f3] shadow-[0_24px_80px_rgb(0_0_0_/_0.28)] lg:flex lg:flex-col">
       <div className="flex items-center gap-3">
         <div className="flex size-11 items-center justify-center rounded-full border border-[#303746] bg-[#f7f7f3] text-[#0f1117]">
-          <BracketsCurlyIcon className="size-6" weight="bold" />
+          <BracesIcon className="size-6" />
         </div>
         <div>
           <p className="text-xs font-semibold uppercase text-[#9ba3b4]">DESIGN.md lab</p>
@@ -141,11 +160,7 @@ function FlavorSidebar({
                         {flavor.description}
                       </p>
                       <div className="mt-4 grid gap-2">
-                        {[
-                          ["Mood", flavor.mood],
-                          ["Density", flavor.density],
-                          ["Motion", flavor.motion],
-                        ].map(([label, value]) => (
+                        {[['Color scheme', flavor.colorScheme], ['Diagnostics', flavor.diagnostics.length ? `${flavor.diagnostics.length} finding(s)` : 'None']].map(([label, value]) => (
                           <div key={label} className="flex items-center justify-between text-sm">
                             <span className="text-[var(--muted-foreground)]">{label}</span>
                             <span className="rounded-full border border-[var(--border)] px-2 py-1 text-xs font-semibold text-[var(--foreground)]">
@@ -158,6 +173,12 @@ function FlavorSidebar({
                     <pre className="mt-4 overflow-x-auto rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--muted)] p-4 text-sm leading-6 text-[var(--foreground)]">
                       {flavor.md}
                     </pre>
+                    {flavor.diagnostics.length > 0 && (
+                      <div className="mt-4 rounded-[var(--radius-card)] border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-[var(--foreground)]">
+                        <p className="font-semibold">This document needs attention</p>
+                        {flavor.diagnostics.map((diagnostic) => <p key={`${diagnostic.path}-${diagnostic.message}`} className="mt-1 text-[var(--muted-foreground)]">{diagnostic.path ? `${diagnostic.path}: ` : ""}{diagnostic.message}</p>)}
+                      </div>
+                    )}
                   </SheetContent>
                 </Sheet>
               </div>
@@ -237,7 +258,7 @@ function StudioSection() {
 
   return (
     <section className="relative w-full">
-      <nav aria-label="Theme preview navigation" className="grid h-12 grid-cols-[1fr_auto_1fr] items-center px-2">
+      <nav aria-label="Theme preview navigation" className="mx-2 grid h-12 grid-cols-[1fr_auto_1fr] items-center px-2 sm:mx-4">
         <span className="text-base font-medium">Studio</span>
         <div className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => (
@@ -254,15 +275,15 @@ function StudioSection() {
         </div>
         <div className="hidden items-center justify-self-end md:flex">
           <div className="flex items-center gap-0.5">
-            <Button variant="ghost" size="icon" aria-label="Search"><MagnifyingGlassIcon /></Button>
-            <Button variant="ghost" size="icon" aria-label="Account"><UserCircleIcon /></Button>
-            <Button variant="ghost" size="icon" aria-label="Cart"><HandbagIcon /></Button>
+            <Button variant="ghost" size="icon" aria-label="Search"><SearchIcon /></Button>
+            <Button variant="ghost" size="icon" aria-label="Account"><UserRoundIcon /></Button>
+            <Button variant="ghost" size="icon" aria-label="Cart"><ShoppingBagIcon /></Button>
           </div>
           <Button size="sm" className="ml-2 h-8">Sign in</Button>
         </div>
       </nav>
-      <div className="px-6 pb-6 pt-6">
-        <div className="mx-auto max-w-[880px] space-y-10">
+      <div className="px-6 pb-0 pt-6">
+        <div className="w-full space-y-10">
           <div className="flex justify-center text-center">
             <div className="max-w-[560px] space-y-4">
               <h2 className="text-4xl font-normal text-foreground">Little joys,<br />everywhere you go</h2>
@@ -284,7 +305,7 @@ function StudioProducts() {
   ];
 
   return (
-    <div className="grid w-full gap-4 md:grid-cols-3">
+    <div className="mb-px grid w-full gap-4 md:grid-cols-3">
       {products.map(([name, description, label, image]) => {
         const inputId = `quantity-${name.toLowerCase().replaceAll(" ", "-")}`;
 
@@ -297,12 +318,12 @@ function StudioProducts() {
               <Badge>{label}</Badge>
               <CardTitle className="text-center text-xl font-semibold leading-7">{name}</CardTitle>
               <CardDescription className="flex-1 text-center text-xs leading-5">{description}</CardDescription>
-              <div className="flex w-full min-w-0 flex-wrap gap-2">
-                <div className="w-[72px]">
+              <div className="grid w-full min-w-0 grid-cols-2 gap-2">
+                <div className="min-w-0">
                   <Label className="sr-only" htmlFor={inputId}>Quantity</Label>
-                  <Input id={inputId} defaultValue="1" aria-label="Quantity" className="h-7 text-sm" />
+                  <Input id={inputId} defaultValue="1" aria-label="Quantity" className="h-7 w-full text-sm" />
                 </div>
-                <Button variant="secondary" size="sm" className="h-7 min-w-0 flex-1">Add to cart</Button>
+                <Button variant="secondary" size="sm" className="h-7 w-full min-w-0">Add to cart</Button>
               </div>
             </CardContent>
           </Card>
@@ -357,9 +378,9 @@ function ReferenceCheckout() {
         <div className="grid gap-2">
           <p className="text-sm font-medium">Payment method</p>
           <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" className="h-16 flex-col gap-1 text-xs">▭<span>Card</span></Button>
-            <Button variant="outline" className="h-16 flex-col gap-1 text-xs">▯<span>Apple Pay</span></Button>
-            <Button variant="outline" className="h-16 flex-col gap-1 text-xs">▱<span>Google Pay</span></Button>
+            <Button variant="outline" className="h-16 flex-col gap-1 text-xs"><CreditCardIcon className="size-4" /><span>Card</span></Button>
+            <Button variant="outline" className="h-16 flex-col gap-1 text-xs"><AppleIcon className="size-4" /><span>Apple Pay</span></Button>
+            <Button variant="outline" className="h-16 flex-col gap-1 text-xs"><WalletCardsIcon className="size-4" /><span>Google Pay</span></Button>
           </div>
         </div>
         <div className="grid gap-2"><Label htmlFor="card-number">Card number</Label><Input id="card-number" placeholder="1234 1234 1234 1234" /></div>
@@ -369,7 +390,7 @@ function ReferenceCheckout() {
         </div>
         <div className="grid gap-2"><Label htmlFor="country">Country</Label><NativeSelect id="country" className="w-full"><NativeSelectOption value="us">United States</NativeSelectOption></NativeSelect></div>
         <Label className="items-start gap-2 text-sm font-normal"><Checkbox defaultChecked aria-label="Securely save my information for 1-click checkout" /><span><span className="block">Securely save my information for 1-click checkout</span><span className="mt-1 block text-xs text-[var(--muted-foreground)]">Pay faster on Studio and everywhere Link is accepted.</span></span></Label>
-        <Button className="w-full">▢&nbsp; Pay now</Button>
+        <Button className="w-full"><CreditCardIcon />Pay now</Button>
       </CardContent>
     </Card>
   );
@@ -378,17 +399,31 @@ function ReferenceCheckout() {
 function ReferenceStudioAi() {
   return (
     <Card className="py-0">
-      <CardHeader className="border-b border-border px-4 py-4"><div className="flex items-center justify-between"><CardTitle className="text-xl font-semibold">Studio AI</CardTitle><div className="flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="Export conversation">⇩</Button><Button variant="ghost" size="icon-sm" aria-label="Close chat">×</Button></div></div></CardHeader>
-      <CardContent className="grid gap-5 p-4">
-        <p className="text-center text-xs text-[var(--muted-foreground)]">Today</p>
-        <MessageGroup>
-          <Message align="end"><MessageContent><div className="max-w-[80%] rounded-lg bg-muted px-4 py-3 text-sm">Where’s my order?</div></MessageContent></Message>
-          <Message><MessageContent><p className="text-sm leading-5">Your order #1043 — the Minimalist Watch and Linen Throw — shipped this morning from the Aisle 3 warehouse and is currently in transit with UPS. It’s on track to arrive at your address by end of day tomorrow.</p><p className="text-sm leading-5">Let me know if you’d like to reschedule the delivery, redirect it to a pickup point, or start a return once it arrives.</p></MessageContent></Message>
-          <Message align="end"><MessageContent><div className="max-w-[80%] rounded-lg bg-muted px-4 py-3 text-sm">Can you show me the full details?</div></MessageContent></Message>
-          <Message><MessageContent><p className="text-sm">Here’s everything I have on order #1043:</p><Card className="grid gap-3 py-4"><div className="flex justify-between gap-4"><span>Items<span className="block text-xs text-[var(--muted-foreground)]">Minimalist Watch · Linen Throw</span></span><strong>$248</strong></div><div><span>Shipping</span><span className="ml-2 text-xs text-[var(--muted-foreground)]">UPS Ground · $12</span></div><div className="flex justify-between"><span>Estimated arrival<span className="block text-xs text-[var(--muted-foreground)]">Tomorrow by 8pm</span></span><Badge>On time</Badge></div><div className="flex justify-between"><span>Tracking<span className="block text-xs text-[var(--muted-foreground)]">UPS 1Z 999 AA1 0123 4567 84</span></span><Button variant="link" size="xs">Track →</Button></div></Card></MessageContent></Message>
-        </MessageGroup>
+      <CardHeader className="border-b border-border px-4 py-4"><div className="flex items-center justify-between"><CardTitle className="text-xl font-semibold">Studio AI</CardTitle><div className="flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="Export conversation"><DownloadIcon /></Button><Button variant="ghost" size="icon-sm" aria-label="Close chat"><XIcon /></Button></div></div></CardHeader>
+      <CardContent className="grid gap-5 px-4 pb-4 pt-0">
+        <MessageScrollerProvider defaultScrollPosition="end">
+          <MessageScroller className="max-h-[480px]">
+            <MessageScrollerViewport>
+              <MessageScrollerContent>
+                <MessageScrollerItem messageId="order-question" scrollAnchor>
+                  <Message align="end"><MessageContent><div className="w-fit max-w-[80%] self-end rounded-lg bg-muted px-4 py-3 text-sm">Where’s my order?</div></MessageContent></Message>
+                </MessageScrollerItem>
+                <MessageScrollerItem messageId="order-answer">
+                  <Message><MessageContent><p className="text-sm leading-5">Your order #1043 — the Minimalist Watch and Linen Throw — shipped this morning from the Aisle 3 warehouse and is currently in transit with UPS. It’s on track to arrive at your address by end of day tomorrow.</p><p className="text-sm leading-5">Let me know if you’d like to reschedule the delivery, redirect it to a pickup point, or start a return once it arrives.</p></MessageContent></Message>
+                </MessageScrollerItem>
+                <MessageScrollerItem messageId="order-details-question" scrollAnchor>
+                  <Message align="end"><MessageContent><div className="w-fit max-w-[80%] self-end rounded-lg bg-muted px-4 py-3 text-sm">Can you show me the full details?</div></MessageContent></Message>
+                </MessageScrollerItem>
+                <MessageScrollerItem messageId="order-details">
+                  <Message><MessageContent><p className="text-sm">Here’s everything I have on order #1043:</p><Card className="mx-px grid min-w-0 gap-3 px-4 py-4"><div className="flex min-w-0 justify-between gap-4"><span className="min-w-0">Items<span className="block text-xs text-[var(--muted-foreground)]">Minimalist Watch · Linen Throw</span></span><strong>$248</strong></div><div className="min-w-0"><span>Shipping</span><span className="ml-2 text-xs text-[var(--muted-foreground)]">UPS Ground · $12</span></div><div className="flex min-w-0 justify-between gap-4"><span className="min-w-0">Estimated arrival<span className="block text-xs text-[var(--muted-foreground)]">Tomorrow by 8pm</span></span><Badge>On time</Badge></div><div className="flex min-w-0 justify-between gap-4"><span className="min-w-0">Tracking<span className="block break-all text-xs text-[var(--muted-foreground)]">UPS 1Z 999 AA1 0123 4567 84</span></span><Button variant="link" size="xs">Track →</Button></div></Card></MessageContent></Message>
+                </MessageScrollerItem>
+              </MessageScrollerContent>
+            </MessageScrollerViewport>
+            <MessageScrollerButton />
+          </MessageScroller>
+        </MessageScrollerProvider>
         <div className="flex flex-wrap justify-center gap-1"><Button variant="secondary" size="sm">Reschedule delivery</Button><Button variant="secondary" size="sm">Update shipping address</Button><Button variant="secondary" size="sm">Start a return</Button></div>
-        <Card className="py-2"><Textarea placeholder="Ask Studio AI..." aria-label="Message input" className="min-h-14 resize-none border-0 bg-transparent p-2 shadow-none focus-visible:ring-0" /><div className="flex items-center justify-between px-2"><Button variant="ghost" size="icon-sm" aria-label="Attach">+</Button><div className="flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="Voice input">♩</Button><Button size="icon-sm" aria-label="Send" disabled>↑</Button></div></div></Card>
+        <Card className="py-2"><Textarea placeholder="Ask Studio AI..." aria-label="Message input" className="min-h-14 resize-none border-0 bg-transparent p-2 shadow-none focus-visible:ring-0" /><div className="flex items-center justify-between px-2"><Button variant="ghost" size="icon-sm" aria-label="Attach"><PlusIcon /></Button><div className="flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="Voice input"><MicIcon /></Button><Button size="icon-sm" aria-label="Send" disabled><ArrowUpIcon /></Button></div></div></Card>
       </CardContent>
     </Card>
   );
@@ -408,28 +443,30 @@ function ReferenceInventory() {
     <Card className="py-0">
       <CardHeader className="flex-row items-center justify-between border-b border-border px-5 py-4"><CardTitle className="text-xl font-semibold">Inventory</CardTitle><Button size="sm"><PlusIcon />Add item</Button></CardHeader>
       <CardContent className="grid gap-4 p-5">
-        <div className="flex flex-wrap items-center gap-3"><div className="relative"><MagnifyingGlassIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input className="h-7 w-48 pl-7" placeholder="Type and hit enter..." aria-label="Search inventory" /></div><Button variant="ghost" size="sm"><TagIcon />Filters</Button><div className="ml-auto flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="List view"><ListBulletsIcon /></Button><Button variant="ghost" size="icon-sm" aria-label="Grid view"><SquaresFourIcon /></Button></div></div>
-        <Alert><WarningIcon /><AlertTitle>2 items are running low</AlertTitle></Alert>
-        <Table><TableHeader className="[&_tr]:border-border"><TableRow><TableHead className="w-10" /><TableHead>Item</TableHead><TableHead>Available</TableHead><TableHead>Location</TableHead><TableHead>Tags</TableHead><TableHead className="w-10" /></TableRow></TableHeader><TableBody>{items.map(([selected, name, details, available, location, tag, image]) => <TableRow key={name} className="border-border"><TableCell><Checkbox defaultChecked={Boolean(selected)} aria-label={`Select ${name}`} /></TableCell><TableCell><div className="flex items-center gap-3"><img src={image} alt="" className="size-10 rounded-lg object-cover" /><span><span className="block font-medium">{name}</span><span className="block text-xs text-[var(--muted-foreground)]">{details}</span></span></div></TableCell><TableCell>{available}</TableCell><TableCell>{location}</TableCell><TableCell><Badge>{tag}</Badge></TableCell><TableCell><Button variant="ghost" size="icon-sm" aria-label="Row actions"><DotsThreeIcon /></Button></TableCell></TableRow>)}</TableBody></Table>
+        <div className="flex flex-wrap items-center gap-3"><div className="relative"><SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-[var(--muted-foreground)]" /><Input className="h-7 w-48 pl-7" placeholder="Type and hit enter..." aria-label="Search inventory" /></div><Button variant="ghost" size="sm"><TagIcon />Filters</Button><div className="ml-auto flex gap-1"><Button variant="ghost" size="icon-sm" aria-label="List view"><ListIcon /></Button><Button variant="ghost" size="icon-sm" aria-label="Grid view"><Grid2X2Icon /></Button></div></div>
+        <Alert><AlertTriangleIcon /><AlertTitle>2 items are running low</AlertTitle></Alert>
+        <Table><TableHeader className="[&_tr]:border-border"><TableRow><TableHead className="w-10" /><TableHead>Item</TableHead><TableHead>Available</TableHead><TableHead>Location</TableHead><TableHead>Tags</TableHead><TableHead className="w-10" /></TableRow></TableHeader><TableBody>{items.map(([selected, name, details, available, location, tag, image]) => <TableRow key={name} className="border-border"><TableCell><Checkbox defaultChecked={Boolean(selected)} aria-label={`Select ${name}`} /></TableCell><TableCell><div className="flex items-center gap-3"><img src={image} alt="" className="size-10 rounded-lg object-cover" /><span><span className="block font-medium">{name}</span><span className="block text-xs text-[var(--muted-foreground)]">{details}</span></span></div></TableCell><TableCell>{available}</TableCell><TableCell>{location}</TableCell><TableCell><Badge>{tag}</Badge></TableCell><TableCell><Button variant="ghost" size="icon-sm" aria-label="Row actions"><EllipsisIcon /></Button></TableCell></TableRow>)}</TableBody></Table>
       </CardContent>
     </Card>
   );
 }
 
 function ReferenceRevenue() {
-  const activity = [["▣", "Order #1043", "Placed · 1:59 pm", "+$248"], ["▤", "Order #1041", "Refunded · 12:40 pm", "−$89"], ["▣", "Order #1040", "Placed · 10:30 am", "+$156"], ["▣", "Order #1038", "Placed · 9:11 am", "+$412"], ["▣", "Order #1037", "Placed · 8:42 am", "+$95"]];
+  const activity = [["order", "Order #1043", "Placed · 1:59 pm", "+$248"], ["refund", "Order #1041", "Refunded · 12:40 pm", "−$89"], ["order", "Order #1040", "Placed · 10:30 am", "+$156"], ["order", "Order #1038", "Placed · 9:11 am", "+$412"], ["order", "Order #1037", "Placed · 8:42 am", "+$95"]];
   return (
-    <Card className="py-0"><CardHeader className="px-5 py-4"><CardTitle className="text-xl font-semibold">Revenue</CardTitle></CardHeader><CardContent className="grid gap-5 px-5 pb-5"><div className="grid grid-cols-2 gap-4"><div><p className="text-2xl font-semibold">18K</p><p className="text-xs text-[var(--muted-foreground)]">Monthly revenue</p></div><div><p className="text-2xl font-semibold">+12%</p><p className="text-xs text-[var(--muted-foreground)]">Order growth</p></div></div><Separator /><div className="flex items-center justify-between"><h3 className="font-semibold">Activity</h3><Button variant="link" size="xs">See all</Button></div><div className="grid gap-4">{activity.map(([icon, title, detail, amount]) => <div key={title} className="flex items-center gap-2 text-sm"><span className="flex size-8 items-center justify-center rounded-full bg-muted text-xs">{icon}</span><span className="min-w-0 flex-1"><span className="block font-medium">{title}</span><span className="block text-xs text-[var(--muted-foreground)]">{detail}</span></span><strong>{amount}</strong></div>)}</div></CardContent></Card>
+    <Card className="py-0"><CardHeader className="px-5 py-4"><CardTitle className="text-xl font-semibold">Revenue</CardTitle></CardHeader><CardContent className="grid gap-5 px-5 pb-5"><div className="grid grid-cols-2 gap-4"><div><p className="text-2xl font-semibold">18K</p><p className="text-xs text-[var(--muted-foreground)]">Monthly revenue</p></div><div><p className="text-2xl font-semibold">+12%</p><p className="text-xs text-[var(--muted-foreground)]">Order growth</p></div></div><Separator /><div className="flex items-center justify-between"><h3 className="font-semibold">Activity</h3><Button variant="link" size="xs">See all</Button></div><div className="grid gap-4">{activity.map(([icon, title, detail, amount]) => <div key={title} className="flex items-center gap-2 text-sm"><span className="flex size-8 items-center justify-center rounded-full bg-muted text-xs">{icon === "refund" ? <ArrowUpIcon className="size-4 rotate-180" /> : <PackageIcon className="size-4" />}</span><span className="min-w-0 flex-1"><span className="block font-medium">{title}</span><span className="block text-xs text-[var(--muted-foreground)]">{detail}</span></span><strong>{amount}</strong></div>)}</div></CardContent></Card>
   );
 }
 
 export default function App() {
-  const [activeFlavor, setActiveFlavor] = React.useState<Flavor | null>(null);
+  const [selectedFlavorId, setSelectedFlavorId] = React.useState<string | null>(null);
+  const activeFlavor = flavors.find((flavor) => flavor.id === selectedFlavorId) ?? null;
+  const setActiveFlavor = (flavor: Flavor | null) => setSelectedFlavorId(flavor?.id ?? null);
 
   return (
     <div>
       <FlavorSidebar activeFlavor={activeFlavor} onFlavorChange={setActiveFlavor} />
-      <div className="theme-root" style={cssVars(activeFlavor)}>
+      <div className={activeFlavor?.colorScheme === "dark" ? "theme-root dark" : "theme-root"} style={cssVars(activeFlavor)}>
         <HomePreview flavor={activeFlavor} onFlavorChange={setActiveFlavor} />
       </div>
     </div>
