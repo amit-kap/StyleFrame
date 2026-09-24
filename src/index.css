@@ -42,9 +42,17 @@ input {
   overflow: hidden;
 }
 
+.app-shell {
+  background: var(--background, var(--app-bg));
+  transition: background-color 700ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 .app-panel {
   flex: 0 0 auto;
   min-width: 0;
+  /* Keep the chrome radius independent of the flavor now that the shell
+     carries flavor variables for the backdrop. */
+  --radius: var(--app-radius-md);
 }
 
 .panel-resize-handle {
@@ -129,8 +137,8 @@ input {
 
 .theme-root {
   font-family: var(--font-sans);
-  min-height: 100vh;
-  background: var(--background);
+  min-height: 0;
+  background: transparent;
   color: var(--foreground);
   transition:
     background-color 700ms cubic-bezier(0.32, 0.72, 0, 1),
@@ -291,33 +299,7 @@ input {
 }
 
 @media (min-width: 1024px) {
-  .app-shell {
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .app-body {
-    height: calc(100vh - 4rem);
-    min-height: 0;
-  }
-
-  .app-panel,
-  .app-body > .theme-root {
-    height: 100%;
-  }
-
-  .app-body > .theme-root {
-    min-height: 0;
-    overflow-y: auto;
-  }
-
   .hero-title {
     font-size: var(--hero-size-lg);
-  }
-}
-
-@media (max-width: 1023px) {
-  .app-body {
-    overflow: visible;
   }
 }

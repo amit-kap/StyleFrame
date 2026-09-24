@@ -161,19 +161,17 @@ function ResizeHandle({
   );
 }
 
-function AppHeader() {
+function AppBrand() {
   return (
-    <header className="app-header flex h-16 items-center border-b border-app-border bg-app-bg px-5 text-app-text">
-      <div className="flex items-center gap-3">
-        <div className="flex size-8 items-center justify-center rounded-full border border-app-border-strong bg-app-text text-app-bg">
-          <BracesIcon className="size-4" />
-        </div>
-        <div className="flex items-baseline gap-3">
-          <span className="text-base font-semibold tracking-tight">StyleFrame</span>
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-muted">design.md lab</span>
-        </div>
+    <div className="mb-4 flex items-center gap-3 border-b border-app-border pb-4">
+      <div className="flex size-8 items-center justify-center rounded-full border border-app-border-strong bg-app-text text-app-bg">
+        <BracesIcon className="size-4" />
       </div>
-    </header>
+      <div className="flex items-baseline gap-3">
+        <span className="text-base font-semibold tracking-tight">StyleFrame</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-muted">design.md lab</span>
+      </div>
+    </div>
   );
 }
 
@@ -193,8 +191,9 @@ function FlavorSidebar({
   useReveal();
 
   return (
-    <aside className="app-panel app-panel-left relative hidden overflow-y-auto border-r border-app-border bg-app-bg p-5 text-app-text shadow-[var(--app-panel-shadow)] lg:flex lg:flex-col" style={{ width: `${width}%` }}>
+    <aside className="app-panel app-panel-left relative m-3 flex min-h-0 flex-col overflow-y-auto rounded-2xl border border-app-border bg-app-bg p-5 text-app-text shadow-[var(--app-panel-shadow)]" style={{ width: `${width}%` }}>
       <ResizeHandle side="left" label="Resize Flavors panel" width={width} onPointerDown={onResize} onKeyDown={onResizeKeyDown} />
+      <AppBrand />
       <div className="space-y-3">
         <p className="text-xs font-semibold uppercase text-app-text-muted">
           Flavors ({flavors.length})
@@ -367,7 +366,7 @@ function FlavorInspector({
   const inspector = activeFlavor?.inspector;
 
   return (
-    <aside className="app-panel app-panel-right relative hidden overflow-y-auto border-l border-app-border bg-app-bg p-5 text-app-text lg:block" style={{ width: `${width}%` }}>
+    <aside className="app-panel app-panel-right relative m-3 min-h-0 overflow-y-auto rounded-2xl border border-app-border bg-app-bg p-5 text-app-text shadow-[var(--app-panel-shadow)]" style={{ width: `${width}%` }}>
       <ResizeHandle side="right" label="Resize Flavor Inspector panel" width={width} onPointerDown={onResize} onKeyDown={onResizeKeyDown} />
       <div className="inspector-content">
         <InspectorSection title="Flavor info" defaultOpen>
@@ -425,54 +424,11 @@ function FlavorInspector({
   );
 }
 
-function MobileFlavorBar({
-  activeFlavor,
-  onFlavorChange,
-}: {
-  activeFlavor: Flavor | null;
-  onFlavorChange: (flavor: Flavor | null) => void;
-}) {
+function HomePreview() {
   return (
-    <div className="sticky top-0 z-30 border-b border-app-border bg-app-bg p-3 text-app-text lg:hidden">
-      <label className="sr-only" htmlFor="flavor-select">
-        Select flavor
-      </label>
-      <select
-        id="flavor-select"
-        value={activeFlavor?.id ?? "no-flavor"}
-        onChange={(event) => {
-          if (event.target.value === "no-flavor") {
-            onFlavorChange(null);
-            return;
-          }
-          const next = flavors.find((flavor) => flavor.id === event.target.value);
-          if (next) onFlavorChange(next);
-        }}
-        className="h-11 w-full rounded-full border border-app-border-strong bg-app-surface-alt px-3 text-sm font-semibold text-app-text"
-      >
-        <option value="no-flavor">No flavor</option>
-        {flavors.map((flavor) => (
-          <option key={flavor.id} value={flavor.id}>
-            {flavor.name}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-function HomePreview({
-  flavor,
-  onFlavorChange,
-}: {
-  flavor: Flavor | null;
-  onFlavorChange: (flavor: Flavor | null) => void;
-}) {
-  return (
-    <main id="main-content" className="min-w-0 flex-1">
-      <MobileFlavorBar activeFlavor={flavor} onFlavorChange={onFlavorChange} />
-      <div className="relative min-h-screen px-6 py-6 md:px-8 lg:px-10">
-        <div className="motif pointer-events-none absolute inset-0" />
+    <main id="main-content" className="relative">
+      <div className="motif pointer-events-none absolute inset-0" />
+      <div className="relative">
         <PreviewFrame />
       </div>
     </main>
@@ -481,7 +437,7 @@ function HomePreview({
 
 function PreviewFrame() {
   return (
-    <Card data-theme-preview="true" className="relative mx-auto w-full max-w-[1200px] gap-0 overflow-hidden py-0">
+    <Card data-theme-preview="true" className="relative w-full gap-0 overflow-hidden rounded-none bg-transparent py-0 ring-0">
       <StudioSection />
       <ReferenceSections />
     </Card>
@@ -570,7 +526,7 @@ function StudioProducts() {
 
 function ReferenceSections() {
   return (
-    <div className="relative w-full space-y-4 bg-[var(--card)] px-6 py-6">
+    <div className="relative w-full space-y-4 px-6 py-6">
       <div className="grid gap-4 lg:grid-cols-[0.36fr_0.64fr]">
         <ReferenceCheckout />
         <ReferenceStudioAi />
@@ -701,9 +657,8 @@ export default function App() {
   const rightPanel = usePanelWidth(PANEL_DEFAULT_RIGHT);
 
   return (
-    <div className="app-shell min-h-screen bg-app-bg">
-      <AppHeader />
-      <div className="app-body flex min-h-[calc(100vh-4rem)] items-stretch">
+    <div className="app-shell h-screen overflow-hidden" style={cssVars(activeFlavor)}>
+      <div className="app-body flex h-screen items-stretch">
         <FlavorSidebar
           activeFlavor={activeFlavor}
           onFlavorChange={setActiveFlavor}
@@ -711,8 +666,8 @@ export default function App() {
           onResize={(event) => leftPanel.startResize(event, 1)}
           onResizeKeyDown={leftPanel.handleKeyDown}
         />
-        <div className={activeFlavor?.colorScheme === "dark" ? "theme-root dark min-w-0 flex-1" : "theme-root min-w-0 flex-1"} style={cssVars(activeFlavor)}>
-          <HomePreview flavor={activeFlavor} onFlavorChange={setActiveFlavor} />
+        <div className={activeFlavor?.colorScheme === "dark" ? "theme-root dark min-h-0 min-w-0 flex-1 overflow-y-auto" : "theme-root min-h-0 min-w-0 flex-1 overflow-y-auto"} style={cssVars(activeFlavor)}>
+          <HomePreview />
         </div>
         <FlavorInspector
           activeFlavor={activeFlavor}
