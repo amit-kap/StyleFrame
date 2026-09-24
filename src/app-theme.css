@@ -1,0 +1,88 @@
+/*
+ * StyleFrame application chrome tokens.
+ *
+ * These variables style the app shell (header, flavor sidebar, inspector,
+ * mobile bar, and the DESIGN.md source sheet). They are intentionally
+ * namespaced with `--app-*` and are never written by the DESIGN.md runtime,
+ * so editing a flavor file cannot restyle the application UI.
+ *
+ * Flavor tokens are injected only on `.theme-root` (see src/index.css and
+ * src/App.tsx); the chrome below must not read any flavor variable.
+ */
+:root {
+  --app-bg: #0f1117;
+  --app-panel: #0f1117;
+  --app-surface: #141923;
+  --app-surface-alt: #151923;
+  --app-surface-raised: #202735;
+  --app-surface-hover: #171c26;
+  --app-surface-active: #252b35;
+  --app-border: #252936;
+  --app-border-subtle: #252d3b;
+  --app-border-strong: #303746;
+  --app-border-hover: #313a4a;
+  --app-border-selected: #5f6878;
+  --app-border-focus: #69758a;
+  --app-text: #f7f7f3;
+  --app-text-strong: #f0f2f5;
+  --app-text-hover: #d2d7df;
+  --app-text-secondary: #b9c0cc;
+  --app-text-token: #c5cad4;
+  --app-text-muted: #9ba3b4;
+  --app-text-faint: #8f98aa;
+  --app-focus-ring: rgb(247 247 243 / 0.7);
+  --app-radius-sm: 0.375rem;
+  --app-radius-md: 0.5rem;
+  --app-radius-lg: 0.75rem;
+  --app-panel-shadow: 0 24px 80px rgb(0 0 0 / 0.28);
+}
+
+/*
+ * Scopes the shared shadcn/component tokens to the app chrome values.
+ * Applied to the portalled DESIGN.md sheet so library primitives render on
+ * the app palette instead of the neutral library defaults. Editors must set
+ * their own variables on `.theme-root`, which overrides these locally.
+ */
+.app-chrome {
+  --background: var(--app-panel);
+  --foreground: var(--app-text);
+  --card: var(--app-surface);
+  --card-foreground: var(--app-text);
+  --popover: var(--app-panel);
+  --popover-foreground: var(--app-text);
+  --primary: var(--app-text);
+  --primary-foreground: var(--app-bg);
+  --secondary: var(--app-surface-active);
+  --secondary-foreground: var(--app-text);
+  --muted: var(--app-surface-active);
+  --muted-foreground: var(--app-text-muted);
+  --accent: var(--app-surface-hover);
+  --accent-foreground: var(--app-text);
+  --border: var(--app-border);
+  --input: var(--app-border-strong);
+  --ring: var(--app-text);
+  --radius: var(--app-radius-md);
+  color: var(--app-text);
+}
+
+@theme {
+  --color-app-bg: var(--app-bg);
+  --color-app-panel: var(--app-panel);
+  --color-app-surface: var(--app-surface);
+  --color-app-surface-alt: var(--app-surface-alt);
+  --color-app-surface-raised: var(--app-surface-raised);
+  --color-app-surface-hover: var(--app-surface-hover);
+  --color-app-surface-active: var(--app-surface-active);
+  --color-app-border: var(--app-border);
+  --color-app-border-subtle: var(--app-border-subtle);
+  --color-app-border-strong: var(--app-border-strong);
+  --color-app-border-hover: var(--app-border-hover);
+  --color-app-border-selected: var(--app-border-selected);
+  --color-app-text: var(--app-text);
+  --color-app-text-strong: var(--app-text-strong);
+  --color-app-text-hover: var(--app-text-hover);
+  --color-app-text-secondary: var(--app-text-secondary);
+  --color-app-text-token: var(--app-text-token);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-text-faint: var(--app-text-faint);
+}

@@ -163,14 +163,14 @@ function ResizeHandle({
 
 function AppHeader() {
   return (
-    <header className="app-header flex h-16 items-center border-b border-[#252936] bg-[#0f1117] px-5 text-[#f7f7f3]">
+    <header className="app-header flex h-16 items-center border-b border-app-border bg-app-bg px-5 text-app-text">
       <div className="flex items-center gap-3">
-        <div className="flex size-8 items-center justify-center rounded-full border border-[#303746] bg-[#f7f7f3] text-[#0f1117]">
+        <div className="flex size-8 items-center justify-center rounded-full border border-app-border-strong bg-app-text text-app-bg">
           <BracesIcon className="size-4" />
         </div>
         <div className="flex items-baseline gap-3">
           <span className="text-base font-semibold tracking-tight">StyleFrame</span>
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9ba3b4]">design.md lab</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-app-text-muted">design.md lab</span>
         </div>
       </div>
     </header>
@@ -193,10 +193,10 @@ function FlavorSidebar({
   useReveal();
 
   return (
-    <aside className="app-panel app-panel-left relative hidden overflow-y-auto border-r border-[#252936] bg-[#0f1117] p-5 text-[#f7f7f3] shadow-[0_24px_80px_rgb(0_0_0_/_0.28)] lg:flex lg:flex-col" style={{ width: `${width}%` }}>
+    <aside className="app-panel app-panel-left relative hidden overflow-y-auto border-r border-app-border bg-app-bg p-5 text-app-text shadow-[var(--app-panel-shadow)] lg:flex lg:flex-col" style={{ width: `${width}%` }}>
       <ResizeHandle side="left" label="Resize Flavors panel" width={width} onPointerDown={onResize} onKeyDown={onResizeKeyDown} />
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase text-[#9ba3b4]">
+        <p className="text-xs font-semibold uppercase text-app-text-muted">
           Flavors ({flavors.length})
         </p>
         <div className="grid gap-2">
@@ -205,10 +205,10 @@ function FlavorSidebar({
             aria-pressed={!activeFlavor}
             onClick={() => onFlavorChange(null)}
             className={[
-              "flavor-option flex h-8 w-full items-center rounded-full border px-3 text-left transition-[background-color,color,border-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70",
+              "flavor-option flex h-8 w-full items-center rounded-full border px-3 text-left transition-[background-color,color,border-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-text/70",
               !activeFlavor
-                ? "border-[#5f6878] bg-[#252b35] text-[#f0f2f5]"
-                : "border-[#252d3b] bg-[#141923] text-[#b9c0cc] hover:border-[#313a4a] hover:bg-[#171c26] hover:text-[#d2d7df]",
+                ? "border-app-border-selected bg-app-surface-active text-app-text-strong"
+                : "border-app-border-subtle bg-app-surface text-app-text-secondary hover:border-app-border-hover hover:bg-app-surface-hover hover:text-app-text-hover",
             ].join(" ")}
           >
             No flavor
@@ -221,8 +221,8 @@ function FlavorSidebar({
                 className={[
                   "flavor-option flex h-8 w-full items-center gap-1 rounded-lg border pr-1 transition-[background-color,color,border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
                   isActive
-                    ? "border-[#5f6878] bg-[#252b35] text-[#f0f2f5]"
-                    : "border-[#252d3b] bg-[#141923] text-[#b9c0cc] hover:border-[#313a4a] hover:bg-[#171c26] hover:text-[#d2d7df]",
+                    ? "border-app-border-selected bg-app-surface-active text-app-text-strong"
+                    : "border-app-border-subtle bg-app-surface text-app-text-secondary hover:border-app-border-hover hover:bg-app-surface-hover hover:text-app-text-hover",
                 ].join(" ")}
               >
                 <button
@@ -230,7 +230,7 @@ function FlavorSidebar({
                   aria-label={`${flavor.name}: ${flavor.description}`}
                   aria-pressed={isActive}
                   onClick={() => onFlavorChange(flavor)}
-                  className="flex h-full min-w-0 flex-1 items-center px-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70"
+                  className="flex h-full min-w-0 flex-1 items-center px-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-text/70"
                 >
                   <span className="truncate">{flavor.name}</span>
                 </button>
@@ -238,13 +238,13 @@ function FlavorSidebar({
                   <SheetTrigger render={
                     <button
                       type="button"
-                      className="flex size-6 shrink-0 items-center justify-center rounded-md text-[#8f98aa] transition-colors hover:bg-[#202735] hover:text-[#f0f2f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70"
+                      className="flex size-6 shrink-0 items-center justify-center rounded-md text-app-text-faint transition-colors hover:bg-app-surface-raised hover:text-app-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-text/70"
                       aria-label={`Open ${flavor.name} DESIGN.md`}
                     >
                       <FileTextIcon className="size-3.5" />
                     </button>
                   } />
-                  <SheetContent className="max-h-[90vh] overflow-y-auto">
+                  <SheetContent className="app-chrome max-h-[90vh] overflow-y-auto">
                     <SheetHeader>
                       <SheetTitle>{flavor.name} source</SheetTitle>
                       <SheetDescription>
@@ -302,7 +302,7 @@ function CopyTokenButton({ value }: { value: string }) {
   return (
     <button
       type="button"
-      className="inspector-copy inline-flex shrink-0 items-center gap-1 rounded-md border border-[#303746] px-1.5 py-1 font-mono text-[11px] text-[#b9c0cc] transition-colors hover:border-[#69758a] hover:text-[#f7f7f3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70"
+      className="inspector-copy inspector-token-value inline-flex shrink-0 items-center gap-1 rounded-md border border-app-border-strong px-1.5 py-1 font-mono text-app-text-secondary transition-colors hover:border-app-border-focus hover:text-app-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-text/70"
       onClick={copyValue}
       aria-label={`Copy ${value}`}
     >
@@ -314,18 +314,18 @@ function CopyTokenButton({ value }: { value: string }) {
 
 function InspectorTokenRows({ entries, swatches = false }: { entries: InspectorEntry[]; swatches?: boolean }) {
   if (entries.length === 0) {
-    return <p className="text-sm text-[#8f98aa]">No values declared.</p>;
+    return <p className="text-sm text-app-text-faint">No values declared.</p>;
   }
 
   return (
-    <div className="grid gap-2">
+    <div className="flex flex-wrap gap-2">
       {entries.map((entry) => (
-        <div key={`${entry.label}-${entry.value}`} className="flex min-w-0 items-center justify-between gap-3 border-b border-[#252936] pb-2 last:border-0 last:pb-0">
+        <div key={`${entry.label}-${entry.value}`} className="min-w-[104px] flex-1">
           <div className="flex min-w-0 items-center gap-2">
             {swatches && <span className="size-3 shrink-0 rounded-sm border border-white/15" style={{ backgroundColor: entry.value }} aria-hidden="true" />}
-            <span className="min-w-0 truncate text-sm text-[#c5cad4]">{entry.label}</span>
+            <span className="inspector-token-label min-w-0 truncate text-app-text-token">{entry.label}</span>
           </div>
-          <CopyTokenButton value={entry.value} />
+          <div className="mt-1 min-w-0"><CopyTokenButton value={entry.value} /></div>
         </div>
       ))}
     </div>
@@ -334,10 +334,10 @@ function InspectorTokenRows({ entries, swatches = false }: { entries: InspectorE
 
 function InspectorSection({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   return (
-    <details className="inspector-section group border-b border-[#252936] py-3" open={defaultOpen}>
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-[#f0f2f5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f7f7f3]/70 [&::-webkit-details-marker]:hidden">
+    <details className="inspector-section group border-b border-app-border py-3" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-app-text-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-text/70 [&::-webkit-details-marker]:hidden">
         <span>{title}</span>
-        <ChevronDownIcon className="size-4 text-[#8f98aa] transition-transform group-open:rotate-180" />
+        <ChevronDownIcon className="size-4 text-app-text-faint transition-transform group-open:rotate-180" />
       </summary>
       <div className="grid gap-4 pb-2 pt-4">{children}</div>
     </details>
@@ -348,7 +348,7 @@ function GuidelineList({ title, items, tone }: { title: string; items: string[];
   return (
     <div className="grid gap-2">
       <p className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${tone === "do" ? "text-emerald-300" : "text-rose-300"}`}>{title}</p>
-      {items.length > 0 ? items.map((item) => <p key={item} className="text-sm leading-5 text-[#b9c0cc]">{item}</p>) : <p className="text-sm text-[#8f98aa]">No guidelines declared.</p>}
+      {items.length > 0 ? items.map((item) => <p key={item} className="text-sm leading-5 text-app-text-secondary">{item}</p>) : <p className="text-sm text-app-text-faint">No guidelines declared.</p>}
     </div>
   );
 }
@@ -367,28 +367,28 @@ function FlavorInspector({
   const inspector = activeFlavor?.inspector;
 
   return (
-    <aside className="app-panel app-panel-right relative hidden overflow-y-auto border-l border-[#252936] bg-[#0f1117] p-5 text-[#f7f7f3] lg:block" style={{ width: `${width}%` }}>
+    <aside className="app-panel app-panel-right relative hidden overflow-y-auto border-l border-app-border bg-app-bg p-5 text-app-text lg:block" style={{ width: `${width}%` }}>
       <ResizeHandle side="right" label="Resize Flavor Inspector panel" width={width} onPointerDown={onResize} onKeyDown={onResizeKeyDown} />
       <div className="inspector-content">
         <InspectorSection title="Flavor info" defaultOpen>
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase text-[#9ba3b4]">Active flavor</p>
+            <p className="text-xs font-semibold uppercase text-app-text-muted">Active flavor</p>
             <p className="text-lg font-medium">{activeFlavor?.name ?? "No flavor"}</p>
-            <p className="text-sm leading-6 text-[#9ba3b4]">
+            <p className="text-sm leading-6 text-app-text-muted">
               {activeFlavor?.description ?? "Select a flavor to transform the main content preview."}
             </p>
           </div>
-          <div className="grid gap-2 rounded-lg border border-[#252936] bg-[#141923] p-3 text-sm">
+          <div className="grid gap-2 rounded-lg border border-app-border bg-app-surface p-3 text-sm">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[#9ba3b4]">Theme scope</span>
+              <span className="text-app-text-muted">Theme scope</span>
               <span className="font-medium">Main content</span>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[#9ba3b4]">Color scheme</span>
+              <span className="text-app-text-muted">Color scheme</span>
               <span className="font-medium">{activeFlavor?.colorScheme ?? "Default"}</span>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[#9ba3b4]">Panel width</span>
+              <span className="text-app-text-muted">Panel width</span>
               <span className="font-medium">{Math.round(width)}%</span>
             </div>
           </div>
@@ -416,7 +416,7 @@ function FlavorInspector({
             </InspectorSection>
           </div>
         ) : (
-          <div className="rounded-lg border border-dashed border-[#303746] p-4 text-sm leading-6 text-[#9ba3b4]">
+          <div className="rounded-lg border border-dashed border-app-border-strong p-4 text-sm leading-6 text-app-text-muted">
             Select a flavor to inspect its design tokens and guidelines.
           </div>
         )}
@@ -433,7 +433,7 @@ function MobileFlavorBar({
   onFlavorChange: (flavor: Flavor | null) => void;
 }) {
   return (
-    <div className="sticky top-0 z-30 border-b border-[#252936] bg-[#0f1117] p-3 text-[#f7f7f3] lg:hidden">
+    <div className="sticky top-0 z-30 border-b border-app-border bg-app-bg p-3 text-app-text lg:hidden">
       <label className="sr-only" htmlFor="flavor-select">
         Select flavor
       </label>
@@ -448,7 +448,7 @@ function MobileFlavorBar({
           const next = flavors.find((flavor) => flavor.id === event.target.value);
           if (next) onFlavorChange(next);
         }}
-        className="h-11 w-full rounded-full border border-[#303746] bg-[#151923] px-3 text-sm font-semibold text-[#f7f7f3]"
+        className="h-11 w-full rounded-full border border-app-border-strong bg-app-surface-alt px-3 text-sm font-semibold text-app-text"
       >
         <option value="no-flavor">No flavor</option>
         {flavors.map((flavor) => (
@@ -701,7 +701,7 @@ export default function App() {
   const rightPanel = usePanelWidth(PANEL_DEFAULT_RIGHT);
 
   return (
-    <div className="app-shell min-h-screen bg-[#0f1117]">
+    <div className="app-shell min-h-screen bg-app-bg">
       <AppHeader />
       <div className="app-body flex min-h-[calc(100vh-4rem)] items-stretch">
         <FlavorSidebar
